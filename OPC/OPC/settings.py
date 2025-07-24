@@ -50,7 +50,8 @@ SECRET_KEY = get_env('SECRET_KEY', 'django-insecure-fallback-key-change-in-produ
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env('DEBUG', True, cast=bool)
 
-ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', 'localhost,127.0.0.1', cast=list)
+ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', '*', cast=list)
+
 
 
 # Application definition
