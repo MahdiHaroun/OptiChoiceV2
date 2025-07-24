@@ -102,7 +102,7 @@ def register_view(request):
             
             # Create activation URL
             activation_url = f"http://142.93.168.121/activate-registration/{temp_token}/"
-              # Send simple activation email using Django's send_mail
+            # Send simple activation email using Django's send_mail
             subject = 'Activate Your OptiChoice Account'
             name_to_use = first_name if first_name else username
             message = f"""Hi {name_to_use},
@@ -116,18 +116,29 @@ This link will expire in 24 hours for security.
 Best regards,
 The OptiChoice Team"""
             
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-            )
-
-            messages.success(
-                request,
-                'Registration link sent! Please check your email to activate your account. No account has been created yet.'
-            )
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                print(f"Email sent successfully to {email}")  # Debug log
+                
+                messages.success(
+                    request,
+                    'Registration link sent! Please check your email to activate your account. No account has been created yet.'
+                )
+            except Exception as email_error:
+                print(f"Email sending failed: {email_error}")  # Debug log
+                print(f"Email settings - Host: {settings.EMAIL_HOST}, Port: {settings.EMAIL_PORT}")
+                print(f"Email settings - TLS: {settings.EMAIL_USE_TLS}, User: {settings.EMAIL_HOST_USER}")
+                messages.error(
+                    request,
+                    f'Registration failed: Unable to send activation email. Please try again later. Error: {str(email_error)}'
+                )
+                return render(request, 'authen/register.html', {'form': form})
             return redirect('register')
             
         except Exception as e:

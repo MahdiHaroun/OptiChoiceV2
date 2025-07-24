@@ -223,16 +223,17 @@ SIMPLE_JWT = {
 
 
 # Email Backend Configuration
-EMAIL_BACKEND = get_env('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = get_env('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = get_env('EMAIL_PORT', 587, cast=int)
-EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', True, cast=bool)
-EMAIL_USE_SSL = get_env('EMAIL_USE_SSL', False, cast=bool)
-EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', 'OptiChoice <noreply@optichoice.com>')
+# SMTP2GO Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.smtp2go.com'
+EMAIL_PORT = 2525
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'MahdiHaroun'
+EMAIL_HOST_PASSWORD = 'BMI$46515M'
+DEFAULT_FROM_EMAIL = 'OptiChoice <noreply@optichoice.me>'
 EMAIL_SUBJECT_PREFIX = '[OptiChoice] '
-EMAIL_TIMEOUT = 30
+EMAIL_TIMEOUT = 60  # Increased timeout for deployment servers
 
 
 
