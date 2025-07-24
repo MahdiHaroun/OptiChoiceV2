@@ -1,0 +1,1681 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-light: #a5b4fc;
+    --primary-dark: #3730a3;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --bg-dark: #18181b;
+    --border: #e5e7eb;
+    --border-dark: #232336;
+    --card-bg: #ffffff;
+    --card-bg-dark: #232336;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --text-dark: #f3f4f6;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.18), 0 1px 2px -1px rgb(0 0 0 / 0.18);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.18), 0 4px 6px -4px rgb(0 0 0 / 0.18);
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+    --card-hover-dark: #282a36;
+    --btn-hover-dark: #3b3e5a;
+    --input-hover-dark: #23234a;
+    --primary-hover-dark: #818cf8;
+}
+[data-theme="dark"] {
+    --bg: #18181b;
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --text: var(--text-dark);
+}
+
+/* Dark theme card hover */
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .input-card:hover,
+[data-theme="dark"] .results-card:hover {
+    background: var(--card-hover-dark);
+    box-shadow: 0 4px 24px 0 rgba(129,140,248,0.10);
+    border-color: var(--primary-hover-dark);
+}
+
+/* Dark theme button hover */
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-outline-primary:hover {
+    background: var(--primary-hover-dark);
+    color: #fff;
+    border-color: var(--primary-hover-dark);
+    box-shadow: 0 2px 12px 0 rgba(129,140,248,0.18);
+}
+[data-theme="dark"] .btn-secondary:hover {
+    background: var(--btn-hover-dark);
+    color: #fff;
+}
+[data-theme="dark"] .btn-success:hover {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: #fff;
+}
+
+/* Dark theme input hover/focus */
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-control:hover,
+[data-theme="dark"] .movie-search-input:focus,
+[data-theme="dark"] .movie-search-input:hover {
+    border-color: var(--primary-hover-dark);
+    background: var(--input-hover-dark);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--primary-hover-dark);
+}
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .movie-search-input {
+    background: var(--card-hover-dark);
+    color: #fff;
+    border-color: var(--border-dark);
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0 0 20px 20px;
+}
+
+.header-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    margin-bottom: 0.75rem;
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Navigation Section */
+.navigation-section {
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.nav-button i {
+    font-size: 1.1rem;
+}
+
+/* Container */
+.movies-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem 2rem;
+    background: none; /* Remove background to eliminate black box */
+    min-height: 100vh;
+}
+[data-theme="dark"] .movies-container {
+    background: none; /* Remove background in dark mode as well */
+}
+
+/* Cards */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    backdrop-filter: blur(20px);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .card {
+    background: rgba(45, 55, 72, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Card Headers */
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+    margin: 0;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.5rem; /* Reduced padding */
+}
+
+/* Input Section */
+.input-card {
+    margin-bottom: 2rem;
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #2d3748;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+/* Modern Search Box */
+#movie-search.select2-hidden-accessible + .select2-container .select2-selection--single {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    min-height: 48px;
+    font-size: 1rem;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+    transition: border 0.2s, box-shadow 0.2s;
+}
+#movie-search.select2-hidden-accessible + .select2-container .select2-selection--single:focus,
+#movie-search.select2-hidden-accessible + .select2-container .select2-selection--single:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+}
+.select2-dropdown {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+.select2-results__option--highlighted {
+    background: var(--primary);
+    color: #fff;
+}
+.select2-search__field {
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+}
+
+/* Search Group */
+.search-group {
+    position: relative;
+}
+
+.movie-select {
+    min-height: 80px; /* Reduced height */
+    border-radius: 8px; /* Smaller border radius for cleaner look */
+}
+
+/* Select2 Customization */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--multiple {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem;
+    min-height: 80px;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.select2-container--default .select2-selection--multiple:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: #667eea;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    padding: 0.4rem 0.6rem;
+    margin: 0.25rem 0.15rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    transition: background-color 0.2s ease;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+    background: #5a67d8;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+    margin-right: 0.3rem; /* Reduced margin */
+    opacity: 0.8;
+    font-size: 0.8rem; /* Smaller remove button */
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    opacity: 1;
+}
+
+/* Form Row */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; /* Reduced gap */
+    margin-bottom: 1.5rem; /* Reduced margin */
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    margin: 2.5rem 0; /* Increased margins */
+    padding: 1.5rem; /* Added padding */
+    background: rgba(106, 17, 203, 0.05); /* Subtle background */
+    border: 1px solid rgba(106, 17, 203, 0.15);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-group:hover {
+    background: rgba(106, 17, 203, 0.08);
+    border-color: rgba(106, 17, 203, 0.25);
+}
+
+.custom-control {
+    position: relative;
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 2rem;
+}
+
+.custom-control-input {
+    position: absolute;
+    left: 0;
+    z-index: -1;
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0;
+}
+
+.custom-control-label {
+    position: relative;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.custom-control-label::before {
+    position: absolute;
+    top: 0.125rem;
+    left: -2rem;
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    pointer-events: none;
+    content: "";
+    background-color: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    border-color: #6a11cb;
+}
+
+.custom-control-label::after {
+    position: absolute;
+    top: 0.125rem;
+    left: -2rem;
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    content: "";
+    background: no-repeat 50%/50% 50%;
+    transition: all 0.3s ease;
+}
+
+.custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%23fff' d='m6.564.75-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3E%3C/svg%3E");
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Recommend Button */
+.btn-recommend {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-recommend:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+}
+
+/* Regenerate Button */
+.btn-regenerate {
+    padding: 0.875rem 1.25rem;
+    background: #718096;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);
+}
+
+.btn-regenerate:hover {
+    transform: translateY(-2px);
+    background: #4a5568;
+    box-shadow: 0 4px 12px rgba(113, 128, 150, 0.4);
+}
+
+/* Submit Button (legacy - keeping for compatibility) */
+.btn-submit {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+}
+
+/* Loading Section */
+.loading-card {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.loading-spinner {
+    margin: 2rem auto;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.spinner-ring {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border: 4px solid transparent;
+    border-top: 4px solid #6a11cb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-title {
+    color: var(--text-primary);
+    margin: 1rem 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Results Section */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.results-title h3 {
+    margin: 0 0 1rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.recommendation-info {
+    background: rgba(106, 17, 203, 0.1);
+    border: 1px solid rgba(106, 17, 203, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
+
+/* Recommendations Grid */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Reduced min width */
+    gap: 1.5rem; /* Reduced gap */
+    margin-top: 1.5rem; /* Reduced margin */
+    padding: 0.5rem 0; /* Reduced padding */
+}
+
+/* Movie Cards */
+.movie-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.movie-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+.movie-card:hover::before {
+    transform: scaleX(1);
+}
+
+.movie-card.selected {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+}
+
+.movie-card.selected::before {
+    transform: scaleX(1);
+}
+
+[data-theme="dark"] .movie-card {
+    background: #2d3748;
+    border-color: #4a5568;
+}
+[data-theme="dark"] .movie-card, [data-theme="dark"] .movie-card * {
+    color: #fff !important;
+}
+
+[data-theme="dark"] .movie-card.selected {
+    background: rgba(102, 126, 234, 0.15);
+}
+
+.movie-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.movie-title {
+    color: #2d3748;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-right: 2.5rem;
+    line-height: 1.4;
+}
+
+/* Input Source */
+.input-source {
+    color: #718096;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #667eea;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+    grid-column: 1 / -1; /* Span across all columns */
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.no-results h4 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.no-results p {
+    font-size: 1rem;
+    opacity: 0.8;
+    line-height: 1.6;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: #667eea;
+    border-color: #667eea;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+}
+
+.btn-outline-danger {
+    background: transparent;
+    color: #e53e3e;
+    border-color: #e53e3e;
+}
+
+.btn-outline-danger:hover {
+    background: #e53e3e;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Error Section */
+.error-card {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.error-content {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+}
+
+.error-title {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Form Helper Text */
+.form-text {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .movies-container {
+        padding: 0 1.5rem 2rem 1.5rem; /* Reduced padding */
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .recommendations-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .results-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem; /* Reduced gap */
+    }
+    
+    .results-actions {
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .card-header {
+        padding: 1.25rem 1.5rem; /* Reduced padding */
+    }
+    
+    .card-body {
+        padding: 1.5rem; /* Reduced padding */
+    }
+}
+
+@media (max-width: 768px) {
+    .movies-container {
+        padding: 0 1rem 2rem 1rem; /* Reduced padding */
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+    }
+    
+    .page-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem; /* Reduced padding */
+    }
+    
+    .card-header {
+        padding: 1rem 1.25rem; /* Reduced padding */
+    }
+    
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem; /* Reduced gap */
+    }
+    
+    .movie-card {
+        padding: 1rem; /* Reduced padding */
+    }
+    
+    .btn-submit {
+        padding: 1rem 1.5rem; /* Reduced padding */
+        font-size: 1rem;
+    }
+    
+    .results-actions {
+        flex-direction: column;
+        gap: 0.75rem; /* Reduced gap */
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.875rem 1.25rem; /* Reduced padding */
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem; /* Reduced margin */
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: 1rem 0.5rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .form-control {
+        padding: 0.75rem 1rem;
+    }
+      .movie-card {
+        padding: 0.875rem;
+    }
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">Genre-Based Recommendations</h1>
+        <p class="page-subtitle">Discover amazing movies by selecting your favorite genres</p>
+    </div>
+</div>
+
+<!-- Navigation Section -->
+<div class="navigation-section">
+    <div class="nav-container">
+        <a href="{% url 'movie_recommendation_page' %}" class="nav-button">
+            <i class="fas fa-film"></i>
+            Try Movie-Based Recommendations
+        </a>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="movies-container">
+    <!-- Genre Selection Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-tags"></i> Select Your Favorite Genres</h3>
+            <p class="text-muted">Choose one or more genres to get personalized movie recommendations</p>
+        </div>
+        <div class="card-body">
+            <div id="genre-form">
+                <!-- Genre Grid -->
+                <div class="genres-grid">
+                    <!-- Action -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-action" name="genres" value="Action">
+                            <label class="custom-control-label" for="genre-action">
+                                <i class="fas fa-fist-raised" style="color: #e74c3c;"></i>
+                                Action
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Adventure -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-adventure" name="genres" value="Adventure">
+                            <label class="custom-control-label" for="genre-adventure">
+                                <i class="fas fa-mountain" style="color: #f39c12;"></i>
+                                Adventure
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Animation -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-animation" name="genres" value="Animation">
+                            <label class="custom-control-label" for="genre-animation">
+                                <i class="fas fa-palette" style="color: #9b59b6;"></i>
+                                Animation
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Children -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-children" name="genres" value="Children">
+                            <label class="custom-control-label" for="genre-children">
+                                <i class="fas fa-child" style="color: #f1c40f;"></i>
+                                Children
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Comedy -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-comedy" name="genres" value="Comedy">
+                            <label class="custom-control-label" for="genre-comedy">
+                                <i class="fas fa-laugh" style="color: #e67e22;"></i>
+                                Comedy
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Crime -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-crime" name="genres" value="Crime">
+                            <label class="custom-control-label" for="genre-crime">
+                                <i class="fas fa-user-secret" style="color: #34495e;"></i>
+                                Crime
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Documentary -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-documentary" name="genres" value="Documentary">
+                            <label class="custom-control-label" for="genre-documentary">
+                                <i class="fas fa-video" style="color: #3498db;"></i>
+                                Documentary
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Drama -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-drama" name="genres" value="Drama">
+                            <label class="custom-control-label" for="genre-drama">
+                                <i class="fas fa-theater-masks" style="color: #8e44ad;"></i>
+                                Drama
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Fantasy -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-fantasy" name="genres" value="Fantasy">
+                            <label class="custom-control-label" for="genre-fantasy">
+                                <i class="fas fa-magic" style="color: #9b59b6;"></i>
+                                Fantasy
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Film-Noir -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-film-noir" name="genres" value="Film-Noir">
+                            <label class="custom-control-label" for="genre-film-noir">
+                                <i class="fas fa-moon" style="color: #2c3e50;"></i>
+                                Film-Noir
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Horror -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-horror" name="genres" value="Horror">
+                            <label class="custom-control-label" for="genre-horror">
+                                <i class="fas fa-ghost" style="color: #e74c3c;"></i>
+                                Horror
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- IMAX -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-imax" name="genres" value="IMAX">
+                            <label class="custom-control-label" for="genre-imax">
+                                <i class="fas fa-expand" style="color: #3498db;"></i>
+                                IMAX
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Musical -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-musical" name="genres" value="Musical">
+                            <label class="custom-control-label" for="genre-musical">
+                                <i class="fas fa-music" style="color: #e91e63;"></i>
+                                Musical
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Mystery -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-mystery" name="genres" value="Mystery">
+                            <label class="custom-control-label" for="genre-mystery">
+                                <i class="fas fa-search" style="color: #95a5a6;"></i>
+                                Mystery
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Romance -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-romance" name="genres" value="Romance">
+                            <label class="custom-control-label" for="genre-romance">
+                                <i class="fas fa-heart" style="color: #e74c3c;"></i>
+                                Romance
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sci-Fi -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-sci-fi" name="genres" value="Sci-Fi">
+                            <label class="custom-control-label" for="genre-sci-fi">
+                                <i class="fas fa-rocket" style="color: #3498db;"></i>
+                                Sci-Fi
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Thriller -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-thriller" name="genres" value="Thriller">
+                            <label class="custom-control-label" for="genre-thriller">
+                                <i class="fas fa-bolt" style="color: #f39c12;"></i>
+                                Thriller
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- War -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-war" name="genres" value="War">
+                            <label class="custom-control-label" for="genre-war">
+                                <i class="fas fa-shield-alt" style="color: #7f8c8d;"></i>
+                                War
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Western -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-western" name="genres" value="Western">
+                            <label class="custom-control-label" for="genre-western">
+                                <i class="fas fa-hat-cowboy" style="color: #d4a574;"></i>
+                                Western
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button type="button" class="btn-recommend" id="get-recommendations">
+                        <i class="fas fa-magic"></i> Get Recommendations
+                    </button>
+                    <button type="button" class="btn-regenerate" id="regenerate-recommendations" style="display: none;">
+                        <i class="fas fa-redo-alt"></i> New Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Section -->
+    <div class="card loading-section" id="loading-section" style="display: none;">
+        <div class="card-body loading-card">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <h4 class="loading-title">Finding Perfect Movies</h4>
+            <p class="loading-text">Analyzing genres and selecting the best recommendations for you...</p>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="card results-section" id="results-section" style="display: none;">
+        <div class="card-header">
+            <div class="results-header">
+                <div class="results-title">
+                    <h3><i class="fas fa-film"></i> Recommended Movies</h3>
+                    <div class="recommendation-info" id="recommendation-info"></div>
+                </div>
+                <div class="results-actions">
+                    <button id="select-all-btn" class="btn btn-outline-primary"><i class="fas fa-check-double"></i> Select All</button>
+                    <button id="save-selected-btn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)</button>
+                    <button type="button" class="btn-regenerate" id="regenerate-btn">
+                        <i class="fas fa-redo-alt"></i> New Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="recommendations-grid" id="recommendations-grid">
+                <!-- Recommendations will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Section -->
+    <div class="card error-section" id="error-section" style="display: none;">
+        <div class="card-body error-card">
+            <div class="error-content">
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+                <h4 class="error-title">Oops! Something went wrong</h4>
+                <p class="error-message" id="error-message">We encountered an issue while getting your recommendations. Please try again.</p>
+                <button type="button" class="btn btn-outline-primary" onclick="location.reload()">
+                    <i class="fas fa-refresh"></i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional CSS for Genres Grid -->
+<style>
+.genres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+[data-theme="dark"] .genres-grid {
+    background: transparent;
+}
+
+.genre-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+[data-theme="dark"] .genre-item {
+    background: #232336;
+    border-color: #353657;
+    color: var(--text-dark);
+}
+
+.genre-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+[data-theme="dark"] .genre-item:hover,
+[data-theme="dark"] .genre-item.selected,
+[data-theme="dark"] .genre-item:has(.custom-control-input:checked) {
+    background: #282a36;
+    border-color: var(--primary-hover-dark);
+    color: var(--text-dark);
+    box-shadow: 0 4px 16px rgba(129,140,248,0.10);
+}
+
+.genre-item .custom-control {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: auto;
+}
+
+.genre-item .custom-control-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 2;
+    cursor: pointer;
+    margin: 0;
+}
+
+.genre-item .custom-control-label {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #2d3748;
+    position: relative;
+    padding-left: 2.5rem;
+    pointer-events: none;
+    z-index: 1;
+}
+[data-theme="dark"] .genre-item .custom-control-label {
+    color: var(--text-dark);
+}
+
+.genre-item .custom-control-label::before {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 4px;
+    background: #ffffff;
+    content: '';
+    transition: all 0.3s ease;
+}
+
+.genre-item .custom-control-label::after {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    content: '';
+    background: no-repeat 50%/50% 50%;
+    transition: all 0.3s ease;
+}
+
+.genre-item .custom-control-input:checked ~ .custom-control-label {
+    color: #667eea;
+    font-weight: 600;
+}
+[data-theme="dark"] .genre-item .custom-control-input:checked ~ .custom-control-label {
+    color: var(--primary-hover-dark);
+}
+
+.genre-item .custom-control-input:checked ~ .custom-control-label::before {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.genre-item .custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%23fff' d='m6.564.75-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3E%3C/svg%3E");
+}
+
+.genre-item:has(.custom-control-input:checked),
+.genre-item.selected {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+/* Add active state for better feedback */
+.genre-item:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+@media (max-width: 768px) {
+    .genres-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .genre-item {
+        padding: 0.75rem;
+    }
+    
+    .custom-control-label {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<!-- JavaScript for AJAX functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const getRecommendationsBtn = document.getElementById('get-recommendations');
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    const regenerateRecommendationsBtn = document.getElementById('regenerate-recommendations');
+    const loadingSection = document.getElementById('loading-section');
+    const resultsSection = document.getElementById('results-section');
+    const errorSection = document.getElementById('error-section');
+    const recommendationsGrid = document.getElementById('recommendations-grid');
+    const recommendationInfo = document.getElementById('recommendation-info');
+    const errorMessage = document.getElementById('error-message');
+
+    function getSelectedGenres() {
+        const checkboxes = document.querySelectorAll('input[name="genres"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function showLoading() {
+        loadingSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+        errorSection.style.display = 'none';
+    }
+
+    function hideLoading() {
+        loadingSection.style.display = 'none';
+    }
+
+    function showError(message) {
+        hideLoading();
+        errorMessage.textContent = message;
+        errorSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+    }    function showResults(data) {
+        hideLoading();
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+
+        const movies = data.recommendations || [];
+        const selectedGenres = getSelectedGenres();
+        
+        recommendationInfo.innerHTML = `
+            <i class="fas fa-info-circle"></i>
+            Found <strong>${movies.length}</strong> great movies for genres: <strong>${selectedGenres.join(', ')}</strong>
+        `;
+
+        recommendationsGrid.innerHTML = '';
+
+        if (movies.length === 0) {
+            recommendationsGrid.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-film"></i>
+                    <h4>No Movies Found</h4>
+                    <p>Try selecting different genres or fewer genre combinations.</p>
+                </div>
+            `;        } else {
+            movies.forEach((movie, index) => {
+                const movieCard = document.createElement('div');
+                movieCard.className = 'movie-card';
+                movieCard.innerHTML = `
+                    <input type="checkbox" class="movie-checkbox" id="movie-${index}">
+                    <h5 class="movie-title">${movie}</h5>
+                    <div class="input-source">
+                        <i class="fas fa-tags"></i>
+                        Genre-based recommendation (GRHR model)
+                    </div>
+                `;
+                recommendationsGrid.appendChild(movieCard);
+            });
+        }
+
+        resultsSection.style.display = 'block';
+        errorSection.style.display = 'none';
+        
+        // Show regenerate button
+        regenerateRecommendationsBtn.style.display = 'inline-flex';
+        
+        // Setup save functionality
+        setupSaveFunctionality();
+    }
+
+    function getRecommendations() {
+        const selectedGenres = getSelectedGenres();
+        
+        if (selectedGenres.length === 0) {
+            alert('Please select at least one genre to get recommendations.');
+            return;
+        }
+
+        showLoading();        // Make AJAX request to get genre-based recommendations
+        fetch('/api/movies/recommend-genre/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                movie_genres: selectedGenres,
+                num_recommendations: 10,
+                model_used: 'GRHR',
+                save_history: false,
+                regenerate: false
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showResults(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Failed to get recommendations. Please try again.');
+        });
+    }
+
+    // Event listeners
+    getRecommendationsBtn.addEventListener('click', getRecommendations);
+    regenerateBtn.addEventListener('click', getRecommendations);
+    regenerateRecommendationsBtn.addEventListener('click', getRecommendations);
+    
+    // Save functionality functions
+    function setupSaveFunctionality() {
+        // Setup movie card selection
+        document.querySelectorAll('.movie-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const movieCard = this.closest('.movie-card');
+                if (this.checked) {
+                    movieCard.classList.add('selected');
+                } else {
+                    movieCard.classList.remove('selected');
+                }
+                updateSelectedCount();
+            });
+        });
+        
+        // Setup Select All button
+        const selectAllBtn = document.getElementById('select-all-btn');
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function() {
+                const allCheckboxes = document.querySelectorAll('.movie-checkbox');
+                const checkedCheckboxes = document.querySelectorAll('.movie-checkbox:checked');
+                const allCards = document.querySelectorAll('.movie-card');
+                
+                const allSelected = (allCheckboxes.length === checkedCheckboxes.length);
+                
+                if (allSelected) {
+                    // Unselect all
+                    allCheckboxes.forEach(cb => cb.checked = false);
+                    allCards.forEach(card => card.classList.remove('selected'));
+                    this.innerHTML = '<i class="fas fa-check-double"></i> Select All';
+                } else {
+                    // Select all
+                    allCheckboxes.forEach(cb => cb.checked = true);
+                    allCards.forEach(card => card.classList.add('selected'));
+                    this.innerHTML = '<i class="fas fa-check-double"></i> Unselect All';
+                }
+                
+                updateSelectedCount();
+            });
+        }
+        
+        // Setup Save button
+        const saveBtn = document.getElementById('save-selected-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function() {
+                const selectedMovies = [];
+                const selectedTitles = [];
+                
+                document.querySelectorAll('.movie-checkbox:checked').forEach(checkbox => {
+                    const card = checkbox.closest('.movie-card');
+                    const title = card.querySelector('.movie-title').textContent.trim();
+                    selectedMovies.push({ title: title });
+                    selectedTitles.push(title);
+                });
+                
+                if (selectedMovies.length === 0) {
+                    showMessage('Please select at least one movie to save to your history.', 'warning');
+                    return;
+                }
+                
+                const confirmMessage = `Save ${selectedMovies.length} selected movie${selectedMovies.length > 1 ? 's' : ''} to your recommendation history?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                
+                // Change button to show it's working
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                this.disabled = true;
+                
+                // Prepare save data
+                const saveData = {
+                    input_genres: getSelectedGenres(),
+                    selected_recommendations: {},
+                    model_used: 'GRHR'
+                };
+                
+                // Use genres as the key
+                const genreKey = getSelectedGenres().join(', ');
+                saveData.selected_recommendations[genreKey] = selectedTitles;
+                
+                // Send save request
+                fetch('/api/movies/save-selected/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(saveData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const successMessage = `🎉 Successfully saved ${selectedMovies.length} movie${selectedMovies.length > 1 ? 's' : ''} to your history!`;
+                    showMessage(successMessage, 'success');
+                    
+                    // Clear selections
+                    document.querySelectorAll('.movie-checkbox:checked').forEach(checkbox => {
+                        checkbox.checked = false;
+                        checkbox.closest('.movie-card').classList.remove('selected');
+                    });
+                    
+                    document.getElementById('select-all-btn').innerHTML = '<i class="fas fa-check-double"></i> Select All';
+                    updateSelectedCount();
+                })
+                .catch(error => {
+                    console.error('Save error:', error);
+                    showMessage('❌ Failed to save recommendations. Please try again.', 'error');
+                })
+                .finally(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                });
+            });
+        }
+        
+        updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+        const selectedCheckboxes = document.querySelectorAll('.movie-checkbox:checked');
+        const totalCheckboxes = document.querySelectorAll('.movie-checkbox');
+        const selectedCount = selectedCheckboxes.length;
+        const totalCount = totalCheckboxes.length;
+        
+        const selectedCountElement = document.getElementById('selected-count');
+        if (selectedCountElement) {
+            selectedCountElement.textContent = selectedCount;
+        }
+        
+        const saveButton = document.getElementById('save-selected-btn');
+        if (saveButton) {
+            if (selectedCount > 0) {
+                saveButton.style.display = 'inline-flex';
+            } else {
+                saveButton.style.display = 'none';
+            }
+        }
+        
+        const selectAllButton = document.getElementById('select-all-btn');
+        if (selectAllButton && totalCount > 0) {
+            if (selectedCount === totalCount) {
+                selectAllButton.innerHTML = '<i class="fas fa-check-double"></i> Unselect All';
+            } else {
+                selectAllButton.innerHTML = '<i class="fas fa-check-double"></i> Select All';
+            }
+        }
+    }
+    
+    function showMessage(message, type) {
+        // Simple alert for now - can be enhanced with better styling
+        alert(message);
+    }    // Add click handlers for genre items
+    document.querySelectorAll('.genre-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Prevent double-triggering if clicked directly on checkbox or label
+            if (e.target.type === 'checkbox') {
+                return; // Let the checkbox handle it naturally
+            }
+            
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                
+                // Trigger change event for any listeners
+                const changeEvent = new Event('change', { bubbles: true });
+                checkbox.dispatchEvent(changeEvent);
+                
+                // Update visual state immediately
+                if (checkbox.checked) {
+                    this.classList.add('selected');
+                } else {
+                    this.classList.remove('selected');
+                }
+            }
+        });
+        
+        // Also handle checkbox change events directly
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+    });
+});
+</script>
+
+<!-- CSRF Token -->
+{% csrf_token %}
+
+{% endblock %}

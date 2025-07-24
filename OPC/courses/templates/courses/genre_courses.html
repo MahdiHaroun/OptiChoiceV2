@@ -1,0 +1,1491 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-light: #a5b4fc;
+    --primary-dark: #3730a3;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --bg-dark: #18181b;
+    --border: #e5e7eb;
+    --border-dark: #232336;
+    --card-bg: #ffffff;
+    --card-bg-dark: #232336;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --text-dark: #f3f4f6;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.18), 0 1px 2px -1px rgb(0 0 0 / 0.18);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.18), 0 4px 6px -4px rgb(0 0 0 / 0.18);
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+    --card-hover-dark: #282a36;
+    --btn-hover-dark: #3b3e5a;
+    --input-hover-dark: #23234a;
+    --primary-hover-dark: #818cf8;
+}
+[data-theme="dark"] {
+    --bg: #18181b;
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --text: var(--text-dark);
+}
+
+/* Dark theme card hover */
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .input-card:hover,
+[data-theme="dark"] .results-card:hover {
+    background: var(--card-hover-dark);
+    box-shadow: 0 4px 24px 0 rgba(129,140,248,0.10);
+    border-color: var(--primary-hover-dark);
+}
+
+/* Dark theme button hover */
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-outline-primary:hover {
+    background: var(--primary-hover-dark);
+    color: #fff;
+    border-color: var(--primary-hover-dark);
+    box-shadow: 0 2px 12px 0 rgba(129,140,248,0.18);
+}
+[data-theme="dark"] .btn-secondary:hover {
+    background: var(--btn-hover-dark);
+    color: #fff;
+}
+[data-theme="dark"] .btn-success:hover {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: #fff;
+}
+
+/* Dark theme input hover/focus */
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-control:hover,
+[data-theme="dark"] .course-search-input:focus,
+[data-theme="dark"] .course-search-input:hover {
+    border-color: var(--primary-hover-dark);
+    background: var(--input-hover-dark);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--primary-hover-dark);
+}
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .course-search-input {
+    background: var(--card-hover-dark);
+    color: #fff;
+    border-color: var(--border-dark);
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0 0 20px 20px;
+}
+
+.header-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    margin-bottom: 0.75rem;
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Navigation Section */
+.navigation-section {
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.nav-button i {
+    font-size: 1.1rem;
+}
+
+/* Container */
+.courses-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem 2rem;
+    background: none; /* Remove background to eliminate black box */
+    min-height: 100vh;
+}
+[data-theme="dark"] .courses-container {
+    background: none; /* Remove background in dark mode as well */
+}
+
+/* Cards */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    backdrop-filter: blur(20px);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .card {
+    background: rgba(45, 55, 72, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Card Headers */
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+    margin: 0;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.5rem; /* Reduced padding */
+}
+
+/* Input Section */
+.input-card {
+    margin-bottom: 2rem;
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #2d3748;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+/* Modern Search Box */
+#course-search.select2-hidden-accessible + .select2-container .select2-selection--single {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    min-height: 48px;
+    font-size: 1rem;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+    transition: border 0.2s, box-shadow 0.2s;
+}
+#course-search.select2-hidden-accessible + .select2-container .select2-selection--single:focus,
+#course-search.select2-hidden-accessible + .select2-container .select2-selection--single:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+}
+.select2-dropdown {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+.select2-results__option--highlighted {
+    background: var(--primary);
+    color: #fff;
+}
+.select2-search__field {
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+}
+
+/* Search Group */
+.search-group {
+    position: relative;
+}
+
+.course-select {
+    min-height: 80px; /* Reduced height */
+    border-radius: 8px; /* Smaller border radius for cleaner look */
+}
+
+/* Select2 Customization */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--multiple {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem;
+    min-height: 80px;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.select2-container--default .select2-selection--multiple:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: #667eea;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    padding: 0.4rem 0.6rem;
+    margin: 0.25rem 0.15rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    transition: background-color 0.2s ease;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+    background: #5a67d8;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+    margin-right: 0.3rem; /* Reduced margin */
+    opacity: 0.8;
+    font-size: 0.8rem; /* Smaller remove button */
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    opacity: 1;
+}
+
+/* Form Row */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; /* Reduced gap */
+    margin-bottom: 1.5rem; /* Reduced margin */
+}
+
+/* Additional CSS for Genres Grid */
+.genres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+[data-theme="dark"] .genres-grid {
+    background: transparent;
+}
+
+.genre-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+[data-theme="dark"] .genre-item {
+    background: #232336;
+    border-color: #353657;
+    color: var(--text-dark);
+}
+
+.genre-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+[data-theme="dark"] .genre-item:hover,
+[data-theme="dark"] .genre-item.selected,
+[data-theme="dark"] .genre-item:has(.custom-control-input:checked) {
+    background: #282a36;
+    border-color: var(--primary-hover-dark);
+    color: var(--text-dark);
+    box-shadow: 0 4px 16px rgba(129,140,248,0.10);
+}
+
+.genre-item .custom-control {
+    width: 100%;
+}
+
+.genre-item.selected,
+.genre-item:has(.custom-control-input:checked) {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.custom-control {
+    position: relative;
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 2rem;
+}
+
+.custom-control-input {
+    position: absolute;
+    left: 0;
+    z-index: -1;
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0;
+}
+
+.custom-control-label {
+    position: relative;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.custom-control-label::before {
+    position: absolute;
+    top: 0.125rem;
+    left: -2rem;
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    pointer-events: none;
+    content: "";
+    background-color: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    border-color: #6a11cb;
+}
+
+.custom-control-label::after {
+    position: absolute;
+    top: 0.125rem;
+    left: -2rem;
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    content: "";
+    background: no-repeat 50%/50% 50%;
+    transition: all 0.3s ease;
+}
+
+.custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%23fff' d='m6.564.75-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3E%3C/svg%3E");
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Loading and Status */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Results Section */
+.results-section {
+    margin-top: 2rem;
+}
+
+.recommendation-info {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.course-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    user-select: none; /* Prevent text selection when clicking */
+}
+
+.course-card * {
+    pointer-events: none; /* Make all child elements non-clickable so only the card responds */
+    user-select: none; /* Prevent text selection */
+}
+
+.course-card .course-checkbox {
+    pointer-events: auto; /* But allow the checkbox to still be clickable */
+}
+
+/* Ensure all text elements are non-selectable and non-clickable */
+.course-card .course-title,
+.course-card .course-provider,
+.course-card .input-source,
+.course-card .course-cover {
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+.course-card:hover {
+    border-color: #667eea;
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.course-card:active {
+    transform: translateY(-1px);
+    background: #e2e8f0;
+}
+
+/* Add active state for better feedback */
+.course-card:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+[data-theme="dark"] .course-card {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #f7fafc;
+}
+
+[data-theme="dark"] .course-card:hover {
+    border-color: #667eea;
+    background: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+}
+
+[data-theme="dark"] .course-card:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Checkbox Styling */
+.course-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    cursor: pointer;
+    z-index: 10;
+    accent-color: var(--primary);
+    transform: scale(1);
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    border: 2px solid var(--border);
+}
+
+.course-checkbox:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 1);
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.course-checkbox:checked {
+    animation: checkboxPulse 0.3s ease;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Dark theme checkbox */
+[data-theme="dark"] .course-checkbox {
+    background: rgba(45, 55, 72, 0.9);
+    border-color: #4a5568;
+}
+
+[data-theme="dark"] .course-checkbox:hover {
+    background: rgba(45, 55, 72, 1);
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .course-checkbox:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+@keyframes checkboxPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Checkbox click area enhancement */
+.course-checkbox::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    cursor: pointer;
+}
+
+.course-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(165, 180, 252, 0.12) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="dark"] .course-card.selected {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(165, 180, 252, 0.20) 100%);
+    border-color: var(--primary);
+}
+
+.course-cover {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.course-info {
+    text-align: center;
+}
+
+.course-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .course-title {
+    color: #f7fafc;
+}
+
+.course-provider {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .course-provider {
+    color: #a0aec0;
+}
+
+.input-source {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    justify-content: center;
+}
+
+[data-theme="dark"] .input-source {
+    background: rgba(102, 126, 234, 0.2);
+    color: #a5b4fc;
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #718096;
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #cbd5e0;
+}
+
+.no-results h4 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+[data-theme="dark"] .no-results h4 {
+    color: #f7fafc;
+}
+
+.course-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.course-item:hover {
+    border-color: #667eea;
+    background: #f1f5f9;
+    transform: translateX(5px);
+}
+
+[data-theme="dark"] .course-item {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #f7fafc;
+}
+
+[data-theme="dark"] .course-item:hover {
+    border-color: #667eea;
+    background: #3a4356;
+}
+
+.course-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+[data-theme="dark"] .course-title {
+    color: #f7fafc;
+}
+
+/* Enhanced Mobile Responsive Design */
+@media (max-width: 768px) {
+    .courses-container {
+        padding: 10px;
+    }
+    
+    .genres-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    
+    .genre-item {
+        padding: 16px 12px;
+        min-height: 60px;
+        border-radius: 10px;
+        text-align: center;
+        /* Better touch targets */
+        min-height: 44px;
+    }
+    
+    .page-title {
+        font-size: 1.8rem;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    
+    .page-subtitle {
+        font-size: 0.95rem;
+        text-align: center;
+    }
+    
+    .page-header {
+        padding: 20px 15px;
+    }
+    
+    /* Improve card layout for mobile */
+    .card {
+        margin-bottom: 15px;
+        border-radius: 12px;
+    }
+    
+    .card-body {
+        padding: 20px 15px;
+    }
+    
+    /* Better button styling */
+    .btn {
+        min-height: 44px;
+        padding: 12px 16px;
+        font-size: 16px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    /* Loading overlay improvements */
+    .loading-overlay {
+        backdrop-filter: blur(2px);
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .courses-container {
+        padding: 5px;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 15px 10px;
+    }
+    
+    .genres-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .genre-item {
+        padding: 18px 15px;
+        font-size: 0.95rem;
+    }
+    
+    .btn {
+        font-size: 14px;
+        padding: 14px 16px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 320px) {
+    .courses-container {
+        padding: 2px;
+    }
+    
+    .page-title {
+        font-size: 1.3rem;
+    }
+    
+    .card-body {
+        padding: 12px 8px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .genre-item, .btn {
+        min-height: 44px;
+    }
+    
+    /* Improve touch feedback */
+    .genre-item {
+        -webkit-tap-highlight-color: rgba(79, 70, 229, 0.1);
+    }
+    
+    /* Remove hover effects on touch devices */
+    .genre-item:hover,
+    .btn:hover {
+        transform: none;
+    }
+}
+</style>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">Genre-Based Course Recommendations</h1>
+        <p class="page-subtitle">Discover amazing courses by selecting your favorite topics</p>
+    </div>
+</div>
+
+<!-- Navigation Section -->
+
+
+<!-- Main Container -->
+<div class="courses-container">
+    <!-- Genre Selection Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-tags"></i> Select Your Favorite Topics</h3>
+            <p class="text-muted" style="margin: 0.5rem 0 0 0; opacity: 0.9;">Choose one or more topics to get personalized course recommendations</p>
+        </div>
+        <div class="card-body">
+            <div id="genre-form">
+                <!-- Genre Grid -->
+                <div class="genres-grid">
+                    <!-- Python -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-python" name="genres" value="Python">
+                            <label class="custom-control-label" for="genre-python">
+                                <i class="fab fa-python" style="color: #3776ab;"></i>
+                                Python
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cloud Computing -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-cloudcomputing" name="genres" value="CloudComputing">
+                            <label class="custom-control-label" for="genre-cloudcomputing">
+                                <i class="fas fa-cloud" style="color: #0084ff;"></i>
+                                Cloud Computing
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Data Analysis -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-dataanalysis" name="genres" value="DataAnalysis">
+                            <label class="custom-control-label" for="genre-dataanalysis">
+                                <i class="fas fa-chart-line" style="color: #28a745;"></i>
+                                Data Analysis
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Containers -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-containers" name="genres" value="Containers">
+                            <label class="custom-control-label" for="genre-containers">
+                                <i class="fab fa-docker" style="color: #2496ed;"></i>
+                                Containers
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Machine Learning -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-machinelearning" name="genres" value="MachineLearning">
+                            <label class="custom-control-label" for="genre-machinelearning">
+                                <i class="fas fa-robot" style="color: #ff6b35;"></i>
+                                Machine Learning
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Computer Vision -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-computervision" name="genres" value="ComputerVision">
+                            <label class="custom-control-label" for="genre-computervision">
+                                <i class="fas fa-eye" style="color: #6f42c1;"></i>
+                                Computer Vision
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Data Science -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-datascience" name="genres" value="DataScience">
+                            <label class="custom-control-label" for="genre-datascience">
+                                <i class="fas fa-database" style="color: #17a2b8;"></i>
+                                Data Science
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Big Data -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-bigdata" name="genres" value="BigData">
+                            <label class="custom-control-label" for="genre-bigdata">
+                                <i class="fas fa-server" style="color: #fd7e14;"></i>
+                                Big Data
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chatbot -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-chatbot" name="genres" value="Chatbot">
+                            <label class="custom-control-label" for="genre-chatbot">
+                                <i class="fas fa-comments" style="color: #20c997;"></i>
+                                Chatbot
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- R -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-r" name="genres" value="R">
+                            <label class="custom-control-label" for="genre-r">
+                                <i class="fab fa-r-project" style="color: #276dc3;"></i>
+                                R Programming
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Backend Development -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-backenddev" name="genres" value="BackendDev">
+                            <label class="custom-control-label" for="genre-backenddev">
+                                <i class="fas fa-cogs" style="color: #6c757d;"></i>
+                                Backend Development
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Frontend Development -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-frontenddev" name="genres" value="FrontendDev">
+                            <label class="custom-control-label" for="genre-frontenddev">
+                                <i class="fas fa-code" style="color: #e83e8c;"></i>
+                                Frontend Development
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Blockchain -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-blockchain" name="genres" value="Blockchain">
+                            <label class="custom-control-label" for="genre-blockchain">
+                                <i class="fas fa-link" style="color: #f7931a;"></i>
+                                Blockchain
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Controls -->
+                <div class="form-group">
+                    <label for="num-recommendations" class="form-label">
+                        <i class="fas fa-list-ol"></i> Number of Recommendations
+                    </label>
+                    <select id="num-recommendations" class="form-control">
+                        <option value="5">5 recommendations</option>
+                        <option value="10">10 recommendations</option>
+                        <option value="15">15 recommendations</option>
+                        <option value="20">20 recommendations</option>
+                    </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" id="get-recommendations" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Get Recommendations
+                    </button>
+                    <button type="button" id="clear-genres" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Clear Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <div class="results-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div class="results-title">
+                        <h3><i class="fas fa-list"></i> Your Course Recommendations</h3>
+                        <div id="recommendation-info" class="recommendation-info"></div>
+                    </div>
+                    <div class="results-actions" style="display: flex; gap: 1rem; align-items: center;">
+                        <button id="select-all-btn" class="btn btn-outline-primary"><i class="fas fa-check-double"></i> Select All</button>
+                        <button id="save-selected-btn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="recommendations-grid" class="recommendations-grid">
+                    <!-- Recommendations will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Section -->
+    <div class="alert alert-danger" id="error-section" style="display: none;">
+        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+        <p id="error-message"></p>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // CSRF token setup
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Handle genre item click to toggle checkbox
+    $('.genre-item').on('click', function(e) {
+        if (e.target.type !== 'checkbox') {
+            const checkbox = $(this).find('input[type="checkbox"]');
+            checkbox.prop('checked', !checkbox.prop('checked'));
+        }
+    });
+
+    // Clear genres button
+    $('#clear-genres').on('click', function() {
+        $('input[name="genres"]').prop('checked', false);
+        $('#results-section').hide();
+        $('#error-section').hide();
+    });
+
+    // Get selected genres function
+    function getSelectedGenres() {
+        const selectedGenres = [];
+        $('input[name="genres"]:checked').each(function() {
+            selectedGenres.push($(this).val());
+        });
+        return selectedGenres;
+    }
+
+    // Show results function
+    function showResults(data) {
+        $('#loadingOverlay').hide();
+        
+        if (data.error) {
+            $('#error-message').text(data.error);
+            $('#error-section').show();
+            $('#results-section').hide();
+            return;
+        }
+
+        const courses = data.recommendations || [];
+        const selectedGenres = getSelectedGenres();
+        
+        $('#recommendation-info').html(`
+            <i class="fas fa-info-circle"></i>
+            Found <strong>${courses.length}</strong> great courses for topics: <strong>${selectedGenres.join(', ')}</strong>
+        `);
+
+        $('#recommendations-grid').empty();
+
+        if (courses.length === 0) {
+            $('#recommendations-grid').html(`
+                <div class="no-results">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h4>No Courses Found</h4>
+                    <p>Try selecting different topics or fewer topic combinations.</p>
+                </div>
+            `);
+        } else {
+            courses.forEach((course, index) => {
+                const courseCard = $(`
+                    <div class="course-card" data-course-index="${index}">
+                        <input type="checkbox" class="course-checkbox" id="course-${index}">
+                        <div class="course-cover">
+                            🎓
+                        </div>
+                        <div class="course-info">
+                            <h4 class="course-title">${course}</h4>
+                            <p class="course-provider">Online Course</p>
+                            <div class="input-source">
+                                <i class="fas fa-tags"></i>
+                                Genre-based recommendation
+                            </div>
+                        </div>
+                    </div>
+                `);
+                $('#recommendations-grid').append(courseCard);
+            });
+        }
+
+        $('#results-section').show();
+        $('#error-section').hide();
+        
+        // Setup save functionality
+        setupSaveFunctionality();
+    }
+
+    // Get recommendations button
+    $('#get-recommendations').on('click', function() {
+        const selectedGenres = getSelectedGenres();
+
+        if (selectedGenres.length === 0) {
+            $('#error-message').text('Please select at least one topic.');
+            $('#error-section').show();
+            $('#results-section').hide();
+            return;
+        }
+
+        const numRecommendations = parseInt($('#num-recommendations').val());
+
+        // Show loading
+        $('#loadingOverlay').show();
+        $('#error-section').hide();
+        $('#results-section').hide();
+
+        // Make API call - NO AUTO-SAVE
+        $.ajax({
+            url: '/courses/api/courses/genre-recommend/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            data: JSON.stringify({
+                course_genres: selectedGenres,
+                num_recommendations: numRecommendations,
+                model_used: 'Genre-Based',
+                save_history: false,  // Explicitly set to false - NO AUTO-SAVE
+                regenerate: false
+            }),
+            success: function(response) {
+                showResults(response);
+            },
+            error: function(xhr, status, error) {
+                $('#loadingOverlay').hide();
+                let errorMessage = 'An error occurred while getting recommendations.';
+                
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                
+                $('#error-message').text(errorMessage);
+                $('#error-section').show();
+            }
+        });
+    });
+    
+    // Save functionality functions
+    function setupSaveFunctionality() {
+        // Clear any existing handlers first
+        $('.course-checkbox').off('change');
+        $('#recommendations-grid').off('click', '.course-card');
+        
+        // Setup course card selection
+        $('.course-checkbox').on('change', function() {
+            const courseCard = $(this).closest('.course-card');
+            if ($(this).is(':checked')) {
+                courseCard.addClass('selected');
+            } else {
+                courseCard.removeClass('selected');
+            }
+            updateSelectedCount();
+        });
+        
+        // Make entire course card clickable using event delegation on the container
+        $('#recommendations-grid').on('click', '.course-card', function(e) {
+            console.log('Card clicked:', e.target); // Debug log
+            
+            // Don't interfere if clicking directly on the checkbox
+            if ($(e.target).is('input[type="checkbox"]') || $(e.target).hasClass('course-checkbox')) {
+                console.log('Clicked on checkbox, ignoring card click');
+                return;
+            }
+            
+            // Prevent any default actions
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const checkbox = $(this).find('.course-checkbox');
+            if (checkbox.length === 0) {
+                console.log('No checkbox found in card');
+                return;
+            }
+            
+            // Toggle the checkbox
+            const isCurrentlyChecked = checkbox.prop('checked');
+            checkbox.prop('checked', !isCurrentlyChecked);
+            
+            console.log('Toggled checkbox from', isCurrentlyChecked, 'to', !isCurrentlyChecked);
+            
+            // Update visual state manually
+            if (!isCurrentlyChecked) {
+                $(this).addClass('selected');
+            } else {
+                $(this).removeClass('selected');
+            }
+            
+            // Update the counter
+            updateSelectedCount();
+        });
+        
+        // Alternative: Also listen for clicks on any element inside the card
+        $('#recommendations-grid').on('click', '.course-card *:not(.course-checkbox)', function(e) {
+            console.log('Child element clicked:', e.target);
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Trigger click on the parent card
+            $(this).closest('.course-card').trigger('click');
+        });
+        
+        // Setup Select All button
+        $('#select-all-btn').off('click').on('click', function() {
+            const allCheckboxes = $('.course-checkbox');
+            const checkedCheckboxes = $('.course-checkbox:checked');
+            const allCards = $('.course-card');
+            
+            const allSelected = (allCheckboxes.length === checkedCheckboxes.length);
+            
+            if (allSelected) {
+                // Unselect all
+                allCheckboxes.prop('checked', false);
+                allCards.removeClass('selected');
+                $(this).html('<i class="fas fa-check-double"></i> Select All');
+            } else {
+                // Select all
+                allCheckboxes.prop('checked', true);
+                allCards.addClass('selected');
+                $(this).html('<i class="fas fa-check-double"></i> Unselect All');
+            }
+            
+            updateSelectedCount();
+        });
+        
+        // Setup Save button
+        $('#save-selected-btn').off('click').on('click', function() {
+            const selectedCourses = [];
+            const selectedTitles = [];
+            
+            $('.course-checkbox:checked').each(function() {
+                const card = $(this).closest('.course-card');
+                const title = card.find('.course-title').text().trim();
+                selectedCourses.push({ title: title });
+                selectedTitles.push(title);
+            });
+            
+            if (selectedCourses.length === 0) {
+                alert('Please select at least one course to save to your history.');
+                return;
+            }
+            
+            const confirmMessage = `Save ${selectedCourses.length} selected course${selectedCourses.length > 1 ? 's' : ''} to your recommendation history?`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            // Change button to show it's working
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+            
+            // Prepare save data
+            const saveData = {
+                input_genres: getSelectedGenres(),
+                selected_recommendations: {},
+                model_used: 'Genre-Based'
+            };
+            
+            // Use genres as the key
+            const genreKey = getSelectedGenres().join(', ');
+            saveData.selected_recommendations[genreKey] = selectedTitles;
+            
+            // Send save request
+            $.ajax({
+                url: '/courses/api/courses/save-selected/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                data: JSON.stringify(saveData),
+                success: function(response) {
+                    const successMessage = `🎉 Successfully saved ${selectedCourses.length} course${selectedCourses.length > 1 ? 's' : ''} to your history!`;
+                    alert(successMessage);
+                    
+                    // Clear selections
+                    $('.course-checkbox:checked').each(function() {
+                        $(this).prop('checked', false);
+                        $(this).closest('.course-card').removeClass('selected');
+                    });
+                    
+                    $('#select-all-btn').html('<i class="fas fa-check-double"></i> Select All');
+                    updateSelectedCount();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Save error:', error);
+                    alert('❌ Failed to save recommendations. Please try again.');
+                },
+                complete: function() {
+                    $('#save-selected-btn').html(originalText).prop('disabled', false);
+                }
+            });
+        });
+        
+        updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+        const selectedCheckboxes = $('.course-checkbox:checked');
+        const totalCheckboxes = $('.course-checkbox');
+        const selectedCount = selectedCheckboxes.length;
+        const totalCount = totalCheckboxes.length;
+        
+        $('#selected-count').text(selectedCount);
+        
+        if (selectedCount > 0) {
+            $('#save-selected-btn').show();
+        } else {
+            $('#save-selected-btn').hide();
+        }
+        
+        if (totalCount > 0) {
+            if (selectedCount === totalCount) {
+                $('#select-all-btn').html('<i class="fas fa-check-double"></i> Unselect All');
+            } else {
+                $('#select-all-btn').html('<i class="fas fa-check-double"></i> Select All');
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

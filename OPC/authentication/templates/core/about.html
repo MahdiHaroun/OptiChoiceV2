@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}About Us - OptiChoice{% endblock %}
+
+{% block content %}
+<style>
+@keyframes logo-shine {
+    0%   { box-shadow: 0 0 48px 16px #eb0707, 0 0 0 8px #df8303; }
+    25%  { box-shadow: 0 0 48px 16px #df8303, 0 0 0 8px #1f09e4; }
+    50%  { box-shadow: 0 0 48px 16px #090de4, 0 0 0 8px #04348f; }
+    75%  { box-shadow: 0 0 48px 16px #063ca0, 0 0 0 8px #c70505; }
+    100% { box-shadow: 0 0 48px 16px #eb0707, 0 0 0 8px #df8303; }
+}
+.about-logo {
+    width: 260px;
+    margin-bottom: 2rem;
+    border-radius: 20px;
+    animation: logo-shine 8s linear infinite;
+}
+</style>
+<div class="about-container" style="text-align:center; margin-top: 3rem;">
+    <img src="{% static 'logo.png' %}" alt="OptiChoice Logo" class="about-logo">
+    <h1>About OptiChoice</h1>
+    <p style="font-size:1.2rem; color:#555; margin-top:1.5rem;">Welcome to OptiChoice!<br>We help you discover the best movies tailored to your taste.<br><br><em>(You can edit this text later.)</em></p>
+</div>
+{% endblock %}

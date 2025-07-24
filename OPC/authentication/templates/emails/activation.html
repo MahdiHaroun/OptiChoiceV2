@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Your OptiChoice Account</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">OptiChoice</div>
+            <h1>Welcome to OptiChoice!</h1>
+        </div>
+        
+        <p>Hi {{ user.first_name|default:user.username }},</p>
+        
+        <p>Thank you for joining OptiChoice! To complete your registration and start discovering amazing movie recommendations, please activate your account by clicking the button below:</p>
+        
+        <div style="text-align: center;">
+            <a href="{{ url }}" class="button">Activate Your Account</a>
+        </div>
+        
+        <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+        <p><a href="{{ url }}">{{ url }}</a></p>
+        
+        <p>Once activated, you'll be able to:</p>
+        <ul>
+            <li>🎬 Get personalized recommendations</li>
+            <li>💾 Save your favorite recommendations</li>
+            <li>📚 View your recommendation history</li>
+            <li>⚙️ Customize your preferences</li>
+        </ul>
+        
+        <div class="footer">
+            <p>This link will expire in 24 hours for security reasons.</p>
+            <p>If you didn't create an account with OptiChoice, please ignore this email.</p>
+            <p>Happy movie discovering!</p>
+            <p><strong>The OptiChoice Team</strong></p>
+        </div>
+    </div>
+</body>
+</html>

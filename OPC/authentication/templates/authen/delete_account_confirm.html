@@ -1,0 +1,294 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Confirm Account Deletion - OptiChoice{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="warning-header">
+        <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 2rem; margin-bottom: 15px;"></i>
+        <h2 style="color: #dc3545;">Final Confirmation</h2>
+    </div>
+    
+    <div class="critical-warning">
+        <h3>🚨 LAST WARNING 🚨</h3>
+        <p><strong>You are about to permanently delete your OptiChoice account.</strong></p>
+        <p>This action is <strong>IRREVERSIBLE</strong> and will immediately remove all your data from our systems.</p>
+    </div>
+    
+    <div class="data-deletion-list">
+        <h4>The following will be permanently deleted:</h4>
+        <ul>
+            <li>✗ Your profile information</li>
+            <li>✗ All saved movie recommendations</li>
+            <li>✗ All saved book recommendations</li>
+            <li>✗ All saved course recommendations</li>
+            <li>✗ Your activity history</li>
+            <li>✗ Personal preferences and settings</li>
+            <li>✗ All associated data</li>
+        </ul>
+    </div>
+    
+    <p style="color: #666; margin-bottom: 25px;">
+        If you're absolutely certain you want to proceed, type <strong>"DELETE"</strong> in the field below to confirm.
+    </p>
+    
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p style="margin: 5px 0;">{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_confirm_deletion">Type "DELETE" to confirm:</label>
+            {{ form.confirm_deletion }}
+            <small class="help-text">This must be typed exactly as shown</small>
+        </div>
+        
+        <div class="button-group">
+            <button type="submit" class="btn btn-danger" style="width: 48%;">
+                <i class="fas fa-trash"></i> Delete Account Forever
+            </button>
+            <a href="{% url 'profile' %}" class="btn btn-secondary" style="width: 48%;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+    
+    <div class="auth-links">
+        <p><strong>Need help?</strong> <a href="{% url 'about' %}">Contact Support</a></p>
+    </div>
+</div>
+
+<style>
+.auth-container {
+    max-width: 550px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.warning-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.critical-warning {
+    background: linear-gradient(135deg, #ff6b6b, #dc3545);
+    color: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.critical-warning h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.data-deletion-list {
+    background-color: #f8f9fa;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.data-deletion-list h4 {
+    margin-top: 0;
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.data-deletion-list ul {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.data-deletion-list li {
+    margin: 8px 0;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #dc3545;
+    font-size: 1.1rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #dc3545;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    box-sizing: border-box;
+    text-transform: uppercase;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #c82333;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.help-text {
+    color: #6c757d;
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
+    text-align: center;
+}
+
+.button-group {
+    display: flex;
+    gap: 4%;
+    margin-bottom: 25px;
+}
+
+.btn {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333, #a71e2a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(220, 53, 69, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(108, 117, 125, 0.4);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.auth-links a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* Dark theme styles */
+[data-theme="dark"] .auth-container {
+    background: rgba(30, 30, 30, 0.95);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+[data-theme="dark"] .critical-warning {
+    background: linear-gradient(135deg, #ff6b6b, #dc3545);
+}
+
+[data-theme="dark"] .data-deletion-list {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid #dc3545;
+}
+
+[data-theme="dark"] .data-deletion-list li {
+    color: #bbbbbb;
+}
+
+[data-theme="dark"] .form-group input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #dc3545;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .form-group input:focus {
+    border-color: #c82333;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+[data-theme="dark"] .help-text {
+    color: #bbbbbb;
+}
+
+[data-theme="dark"] .auth-links {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 15px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .btn {
+        width: 100% !important;
+    }
+}
+</style>
+
+{% endblock %}

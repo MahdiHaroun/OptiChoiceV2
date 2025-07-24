@@ -1,0 +1,260 @@
+
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Welcome to OptiChoice{% endblock %}
+
+{% block content %}
+<div class="hero-section">    
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="{% static 'images/logo.png' %}" alt="OptiChoice Logo" class="hero-logo">
+    </div>
+    
+    <h1 class="hero-title">
+        Welcome to OptiChoice
+    </h1>
+    <p class="hero-subtitle">
+        Discover your next obsession with AI-powered recommendation system
+    </p>
+    
+    <div class="hero-buttons">
+        <a href="{% url 'login' %}" class="btn btn-primary hero-btn">
+            Get Started - Login
+        </a>
+        <a href="{% url 'register' %}" class="btn btn-secondary hero-btn">
+            Create Account
+        </a>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="dashboard-cards">
+        <div class="card">
+            <h3>🎯 Many Fields for Recommendations</h3>
+            <p>Get personalized recommendations for watching, listening, reading or even studying</p>
+        </div>
+        
+        <div class="card">
+            <h3>🤖 Multiple Models</h3>
+            <p>Choose from Multiple AI models for diverse suggestions</p>
+        </div>
+        
+        <div class="card">
+            <h3>📱 All Recommendations, One Place</h3>
+            <p>Intuitive interface with search, filtering and history tracking for the best user experience</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    text-align: center;
+    color: var(--text-primary);
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.logo-container {
+    margin-bottom: 30px;
+}
+
+.hero-logo {
+    max-width: 200px;
+    height: 200px;
+    margin-bottom: 10px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    color: var(--text-primary);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    color: var(--text-primary);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-btn {
+    font-size: 1.1rem;
+    padding: 15px 30px;
+    min-height: 44px;
+}
+
+.features-section {
+    margin-top: 80px;
+}
+
+/* Enhanced Mobile Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        margin-top: 10px;
+        padding: 15px;
+    }
+    
+    .hero-logo {
+        max-width: 150px;
+        height: 150px;
+        margin-bottom: 15px;
+    }
+    
+    .hero-title {
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+        line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 30px;
+        line-height: 1.4;
+        padding: 0 10px;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .hero-btn {
+        font-size: 16px;
+        padding: 14px 24px;
+        width: 100%;
+        max-width: 280px;
+        border-radius: 8px;
+    }
+    
+    .features-section {
+        margin-top: 50px;
+        padding: 0 10px;
+    }
+    
+    .dashboard-cards {
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .card {
+        padding: 25px 20px;
+        border-radius: 12px;
+    }
+    
+    .card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+    }
+    
+    .card p {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 10px;
+    }
+    
+    .hero-logo {
+        max-width: 120px;
+        height: 120px;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+    
+    .hero-btn {
+        font-size: 14px;
+        padding: 16px 20px;
+        max-width: 260px;
+    }
+    
+    .features-section {
+        margin-top: 40px;
+        padding: 0 5px;
+    }
+    
+    .card {
+        padding: 20px 15px;
+    }
+    
+    .card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .card p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 320px) {
+    .hero-section {
+        padding: 5px;
+    }
+    
+    .hero-logo {
+        max-width: 100px;
+        height: 100px;
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .hero-btn {
+        padding: 16px 18px;
+        max-width: 240px;
+    }
+    
+    .card {
+        padding: 15px 10px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .hero-btn {
+        min-height: 44px;
+        -webkit-tap-highlight-color: rgba(74, 144, 226, 0.1);
+    }
+    
+    /* Remove hover effects on touch devices */
+    .hero-btn:hover,
+    .card:hover {
+        transform: none;
+    }
+}
+
+/* Improve text legibility on small screens */
+@media (max-width: 768px) {
+    .hero-title,
+    .hero-subtitle {
+        text-shadow: none;
+    }
+}
+</style>
+{% endblock %}

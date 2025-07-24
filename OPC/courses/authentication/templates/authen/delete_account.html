@@ -1,0 +1,217 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Delete Account - OptiChoice{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="warning-header">
+        <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 2rem; margin-bottom: 15px;"></i>
+        <h2 style="color: #dc3545;">Delete Your Account</h2>
+    </div>
+    
+    <div class="warning-box">
+        <h4>⚠️ This action cannot be undone!</h4>
+        <p>Deleting your account will permanently remove:</p>
+        <ul>
+            <li>Your profile information</li>
+            <li>All saved recommendations</li>
+            <li>Your activity history</li>
+            <li>Personal preferences</li>
+            <li>All associated data</li>
+        </ul>
+    </div>
+    
+    <p style="color: #666; margin-bottom: 25px;">
+        To proceed with account deletion, please confirm your email address. We'll send you a confirmation link to ensure this request is legitimate.
+    </p>
+    
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p style="margin: 5px 0;">{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_email">Confirm Your Email Address:</label>
+            {{ form.email }}
+            <small class="help-text">Enter your account email to confirm identity</small>
+        </div>
+        
+        <button type="submit" class="btn btn-danger" style="width: 100%; padding: 12px;">
+            Send Deletion Confirmation
+        </button>
+    </form>
+    
+    <div class="auth-links">
+        <p><a href="{% url 'profile' %}">← Back to Profile</a></p>
+        <p>Changed your mind? <a href="{% url 'dashboard' %}">Go to Dashboard</a></p>
+    </div>
+</div>
+
+<style>
+.auth-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.warning-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.warning-box {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    color: #856404;
+}
+
+.warning-box h4 {
+    margin-top: 0;
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.warning-box ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.warning-box li {
+    margin: 5px 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.help-text {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.auth-links p {
+    margin: 10px 0;
+}
+
+.auth-links a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* Dark theme styles */
+[data-theme="dark"] .auth-container {
+    background: rgba(30, 30, 30, 0.95);
+    border-radius: 10px;
+    padding: 30px;
+}
+
+[data-theme="dark"] .warning-box {
+    background-color: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffd700;
+}
+
+[data-theme="dark"] .warning-box h4 {
+    color: #ff6b6b;
+}
+
+[data-theme="dark"] .form-group label {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .form-group input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .form-group input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .help-text {
+    color: #bbbbbb;
+}
+</style>
+
+{% endblock %}

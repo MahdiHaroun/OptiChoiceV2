@@ -1,0 +1,146 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Your Username - OptiChoice{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="success-message">
+        <div class="success-icon">✓</div>
+        <h2>Username Retrieved Successfully!</h2>
+        
+        <div class="username-display">
+            <p style="color: #666; margin-bottom: 15px;">Your username is:</p>
+            <div class="username-box">
+                <strong>{{ username }}</strong>
+            </div>
+        </div>
+        
+        <p style="color: #666; margin: 20px 0;">
+            You can now use this username to log in to your OptiChoice account.
+        </p>
+        
+        <div class="action-buttons">
+            <a href="{% url 'login' %}" class="btn btn-primary" style="width: 100%; padding: 12px; text-align: center; display: block; text-decoration: none; margin-bottom: 10px;">
+                Go to Login
+            </a>
+            <a href="{% url 'forgot_password' %}" class="btn btn-secondary" style="width: 100%; padding: 12px; text-align: center; display: block; text-decoration: none;">
+                Reset Password Instead
+            </a>
+        </div>
+    </div>
+    
+    <div class="auth-links">
+        <p>Need help? <a href="{% url 'about' %}">Contact Support</a></p>
+        <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+    </div>
+</div>
+
+<style>
+.auth-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.success-message {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.success-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 auto 20px;
+}
+
+.username-display {
+    margin: 25px 0;
+}
+
+.username-box {
+    background: #f8f9fa;
+    border: 2px solid #6a11cb;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    font-size: 18px;
+    color: #6a11cb;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.action-buttons {
+    margin: 25px 0;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 17, 203, 0.3);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #6a11cb;
+    border: 1px solid #6a11cb;
+}
+
+.btn-secondary:hover {
+    background: #6a11cb;
+    color: white;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.auth-links p {
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.auth-links a {
+    color: #6a11cb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+/* Prevent horizontal scrolling */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+</style>
+{% endblock %}

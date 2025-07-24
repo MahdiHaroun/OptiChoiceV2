@@ -1,0 +1,555 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Profile - OptiChoice{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">        <div class="profile-avatar">
+            <div class="avatar-circle">{% if user.first_name %}{{ user.first_name|first|upper }}{% else %}{{ user.username|first|upper }}{% endif %}</div>
+        </div><div class="profile-info">
+            <h1>{% if user.first_name %}{{ user.first_name }}{% if user.last_name %} {{ user.last_name }}{% endif %}{% else %}{{ user.username }}{% endif %}</h1>
+            <p class="profile-username">@{{ user.username }}</p>
+            <p class="profile-email">{{ user.email }}</p>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <!-- Account Information Card -->
+        <div class="profile-card">
+            <h2>📋 Account Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Username:</label>
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email:</label>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="info-item">
+                    <label>First Name:</label>
+                    <span>{{ user.first_name|default:"Not set" }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Last Name:</label>
+                    <span>{{ user.last_name|default:"Not set" }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Date Joined:</label>
+                    <span>{{ user.date_joined|date:"F d, Y" }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email Verified:</label>
+                    <span class="status-badge {% if user.userprofile.email_verified %}verified{% else %}unverified{% endif %}">
+                        {% if user.userprofile.email_verified %}✓ Verified{% else %}✗ Unverified{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>        <!-- Account Actions Card -->
+        <div class="profile-card">
+            <h2>⚙️ Account Actions</h2>
+            <div class="action-buttons">
+                <a href="{% url 'forgot_password' %}" class="action-btn change-password">
+                    <div class="action-icon">🔒</div>
+                    <div class="action-text">
+                        <h3>Change Password</h3>
+                        <p>Update your account password</p>
+                    </div>
+                </a>
+                
+                <a href="{% url 'delete_account' %}" class="action-btn delete-account">
+                    <div class="action-icon">🗑️</div>
+                    <div class="action-text">
+                        <h3>Delete Account</h3>
+                        <p>Permanently delete your account</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity Card -->
+        <div class="profile-card">
+            <h2>📊 Activity</h2>
+            <div class="activity-stats">
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Recommendations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Saved Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ user.date_joined|timesince }}</div>
+                    <div class="stat-label">Member Since</div>
+                </div>            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Dark theme header */
+[data-theme="dark"] .profile-header {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.profile-avatar {
+    margin-right: 30px;
+}
+
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.profile-info h1 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Dark theme profile info */
+[data-theme="dark"] .profile-info h1 {
+    color: #ffffff;
+}
+
+.profile-username {
+    color: #6a11cb;
+    font-weight: 500;
+    margin: 5px 0;
+}
+
+.profile-email {
+    color: #666;
+    margin: 5px 0;
+}
+
+/* Dark theme profile text */
+[data-theme="dark"] .profile-email {
+    color: #bbbbbb;
+}
+
+.profile-content {
+    display: grid;
+    gap: 30px;
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Dark theme cards */
+[data-theme="dark"] .profile-card {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.profile-card h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Dark theme card headings */
+[data-theme="dark"] .profile-card h2 {
+    color: #ffffff;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(106, 17, 203, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid #6a11cb;
+}
+
+/* Dark theme info items */
+[data-theme="dark"] .info-item {
+    background: rgba(106, 17, 203, 0.15);
+}
+
+.info-item label {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Dark theme info labels */
+[data-theme="dark"] .info-item label {
+    color: #ffffff;
+}
+
+.info-item span {
+    color: #666;
+    font-weight: 500;
+}
+
+/* Dark theme info values */
+[data-theme="dark"] .info-item span {
+    color: #bbbbbb;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-badge.verified {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.unverified {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Dark theme status badges */
+[data-theme="dark"] .status-badge.verified {
+    background: #155724;
+    color: #d4edda;
+}
+
+[data-theme="dark"] .status-badge.unverified {
+    background: #721c24;
+    color: #f8d7da;
+}
+
+.action-buttons {
+    display: grid;
+    gap: 15px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: rgba(106, 17, 203, 0.05);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* Dark theme action buttons */
+[data-theme="dark"] .action-btn {
+    background: rgba(106, 17, 203, 0.15);
+}
+
+.action-btn:hover {
+    background: rgba(106, 17, 203, 0.1);
+    border-color: #6a11cb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(106, 17, 203, 0.2);
+}
+
+/* Dark theme action button hover */
+[data-theme="dark"] .action-btn:hover {
+    background: rgba(106, 17, 203, 0.25);
+}
+
+/* Delete button special styling */
+.delete-account:hover {
+    background: rgba(220, 53, 69, 0.1) !important;
+    border-color: #dc3545 !important;
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2) !important;
+}
+
+[data-theme="dark"] .delete-account:hover {
+    background: rgba(220, 53, 69, 0.2) !important;
+}
+
+.action-icon {
+    font-size: 2rem;
+    margin-right: 20px;
+}
+
+.action-text h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Dark theme action text */
+[data-theme="dark"] .action-text h3 {
+    color: #ffffff;
+}
+
+.action-text p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Dark theme action descriptions */
+[data-theme="dark"] .action-text p {
+    color: #bbbbbb;
+}
+
+.activity-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 20px;
+    background: rgba(106, 17, 203, 0.05);
+    border-radius: 10px;
+}
+
+/* Dark theme stats */
+[data-theme="dark"] .stat-item {
+    background: rgba(106, 17, 203, 0.15);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #6a11cb;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #666;
+    font-weight: 500;
+}
+
+/* Dark theme stat labels */
+[data-theme="dark"] .stat-label {
+    color: #bbbbbb;
+}
+
+/* Enhanced Mobile Responsive Design */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 10px;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px 15px;
+        border-radius: 12px;
+    }
+    
+    .profile-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .profile-info h1 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+    
+    .profile-username,
+    .profile-email {
+        font-size: 1rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .info-item {
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .info-item label {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .info-item span {
+        font-size: 1rem;
+    }
+    
+    .activity-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    
+    .stat-item {
+        padding: 15px 10px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .profile-card {
+        margin-bottom: 15px;
+        padding: 20px 15px;
+        border-radius: 12px;
+    }
+    
+    .profile-card h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+    
+    /* Better button styling for mobile */
+    .btn {
+        min-height: 44px;
+        padding: 12px 16px;
+        font-size: 16px;
+        width: 100%;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 5px;
+    }
+    
+    .profile-header {
+        padding: 20px 10px;
+    }
+    
+    .avatar-circle {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+    
+    .profile-info h1 {
+        font-size: 1.3rem;
+    }
+    
+    .profile-username,
+    .profile-email {
+        font-size: 0.9rem;
+    }
+    
+    .activity-stats {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .stat-item {
+        padding: 12px 8px;
+    }
+    
+    .stat-number {
+        font-size: 1.3rem;
+    }
+    
+    .profile-card {
+        padding: 15px 10px;
+    }
+    
+    .profile-card h2 {
+        font-size: 1.2rem;
+    }
+    
+    .info-item {
+        padding: 12px;
+    }
+    
+    .btn {
+        font-size: 14px;
+        padding: 14px 16px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 320px) {
+    .profile-container {
+        padding: 2px;
+    }
+    
+    .profile-header {
+        padding: 15px 8px;
+    }
+    
+    .profile-card {
+        padding: 12px 8px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        -webkit-tap-highlight-color: rgba(74, 144, 226, 0.1);
+    }
+    
+    /* Remove hover effects on touch devices */
+    .profile-card:hover,
+    .btn:hover {
+        transform: none;
+    }
+}
+</style>
+
+{% endblock %}

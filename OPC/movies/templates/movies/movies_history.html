@@ -1,0 +1,1176 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Recommendation History - OptiChoice{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="history-container">
+    <!-- Header Section -->
+    <div class="history-header">
+        <div class="header-content">
+            <h1>📖 Your Recommendation History</h1>
+            <p class="header-subtitle">Browse through your past movie recommendations and discoveries</p>
+        </div>
+        <div class="header-actions">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="history-search" placeholder="Search by movie title or model..." />
+            </div>
+            <button id="clear-all-btn" class="btn btn-danger" style="display: none;">
+                <i class="fas fa-trash"></i> Clear All History
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-icon">🎬</div>
+            <div class="stat-content">
+                <div class="stat-number" id="total-recommendations">0</div>
+                <div class="stat-label">Total Recommendations</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-content">
+                <div class="stat-number" id="models-used">0</div>
+                <div class="stat-label">AI Models Used</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <div class="stat-number" id="days-active">0</div>
+                <div class="stat-label">Days Active</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label for="model-filter">Filter by Model:</label>
+            <select id="model-filter">
+                <option value="">All Models</option>
+                <option value="tfidf">TF-IDF</option>
+                <option value="knn">KNN</option>
+                <option value="Genre-Based">Genre-Based</option>
+                <option value="knn_genre">KNN-Genre</option>
+                <option value="Embeddings">Embeddings</option>
+                <option value="NN">Neural Network</option>
+                <option value="GRHR">GRHR</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="sort-filter">Sort by:</label>
+            <select id="sort-filter">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="model">Model Type</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading Section -->
+    <div id="loading-section" class="loading-section">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+        <p>Loading your recommendation history...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state" style="display: none;">
+        <div class="empty-icon">📝</div>
+        <h3>No Recommendation History Yet</h3>
+        <p>Start exploring movies to build your recommendation history!</p>
+        <a href="{% url 'movie_recommendation_page' %}" class="btn btn-primary">
+            <i class="fas fa-film"></i> Get Movie Recommendations
+        </a>
+    </div>
+
+    <!-- History List -->
+    <div id="history-list" class="history-list">
+        <!-- History items will be populated here -->
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="pagination-container">
+        <!-- Pagination will be populated here -->
+    </div>
+</div>
+
+<!-- History Item Modal -->
+<div id="history-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Recommendation Details</h3>
+            <span class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <!-- Modal content will be populated here -->
+        </div>
+        <div class="modal-footer">
+            <button id="delete-history-btn" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete This History
+            </button>
+            <button class="btn btn-secondary modal-close">Close</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-content h1 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-size: 2.2rem;
+}
+
+.header-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.search-container {
+    position: relative;
+    min-width: 300px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+#history-search {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#history-search:focus {
+    outline: none;
+    border-color: #6a11cb;
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+}
+
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border-radius: 50%;
+    color: white;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.filter-section {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    flex-wrap: wrap;
+    border: 1px solid var(--border-color);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.filter-group select {
+    padding: 10px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: #6a11cb;
+}
+
+.loading-section {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.loading-spinner {
+    margin-bottom: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid #6a11cb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: var(--card-bg);
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #6a11cb;
+}
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.history-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.history-meta {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.model-badge {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.history-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.history-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-view {
+    background: var(--button-primary);
+    color: white;
+}
+
+.btn-view:hover {
+    background: var(--button-primary-hover);
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+.recommendations-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.recommendation-tag {
+    background: rgba(106, 17, 203, 0.1);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(106, 17, 203, 0.2);
+}
+
+.show-more {
+    background: rgba(106, 17, 203, 0.2);
+    color: #6a11cb;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.show-more:hover {
+    background: rgba(106, 17, 203, 0.3);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--card-bg);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.modal-close {
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.modal-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 25px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.recommendation-item {
+    background: rgba(106, 17, 203, 0.05);
+    border: 1px solid rgba(106, 17, 203, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.recommendation-item:hover {
+    background: rgba(106, 17, 203, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+    background: #6a11cb;
+    color: white;
+    border-color: #6a11cb;
+}
+
+.pagination-btn.active {
+    background: #6a11cb;
+    color: white;
+    border-color: #6a11cb;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .history-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-actions {
+        justify-content: center;
+    }
+    
+    .search-container {
+        min-width: auto;
+    }
+    
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .filter-group {
+        min-width: auto;
+    }
+    
+    .history-item-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .stat-card {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .history-item:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .modal-content {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+</style>
+
+<script>
+class HistoryManager {
+    constructor() {
+        this.historyData = [];
+        this.filteredData = [];
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
+        this.currentHistoryId = null;
+        
+        this.initializeElements();
+        this.attachEventListeners();
+        this.loadHistory();
+    }
+    
+    initializeElements() {
+        this.loadingSection = document.getElementById('loading-section');
+        this.emptyState = document.getElementById('empty-state');
+        this.historyList = document.getElementById('history-list');
+        this.searchInput = document.getElementById('history-search');
+        this.modelFilter = document.getElementById('model-filter');
+        this.sortFilter = document.getElementById('sort-filter');
+        this.clearAllBtn = document.getElementById('clear-all-btn');
+        this.pagination = document.getElementById('pagination');
+        this.modal = document.getElementById('history-modal');
+        this.deleteHistoryBtn = document.getElementById('delete-history-btn');
+        
+        // Stats elements
+        this.totalRecommendations = document.getElementById('total-recommendations');
+        this.modelsUsed = document.getElementById('models-used');
+        this.daysActive = document.getElementById('days-active');
+    }
+    
+    attachEventListeners() {
+        this.searchInput.addEventListener('input', () => this.applyFilters());
+        this.modelFilter.addEventListener('change', () => this.applyFilters());
+        this.sortFilter.addEventListener('change', () => this.applyFilters());
+        this.clearAllBtn.addEventListener('click', () => this.clearAllHistory());
+        this.deleteHistoryBtn.addEventListener('click', () => this.deleteCurrentHistory());
+        
+        // Modal event listeners
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => this.closeModal());
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === this.modal) this.closeModal();
+        });
+    }
+      async loadHistory() {
+        try {
+            this.showLoading();
+              const response = await fetch('/api/movies/history/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.historyData = data.results || data || [];
+            this.updateStats();
+            this.applyFilters();
+            
+        } catch (error) {
+            console.error('Error loading history:', error);
+            this.showError('Failed to load recommendation history. Please try again.');
+        }
+    }
+    
+    updateStats() {
+        const totalRecs = this.historyData.reduce((sum, item) => {
+            return sum + (Array.isArray(item.recommended_titles) ? item.recommended_titles.length : 0);
+        }, 0);
+        
+        const uniqueModels = new Set(this.historyData.map(item => item.model_used)).size;
+        
+        const timestamps = this.historyData.map(item => new Date(item.timestamp));
+        const oldestDate = timestamps.length > 0 ? Math.min(...timestamps) : Date.now();
+        const daysDiff = Math.ceil((Date.now() - oldestDate) / (1000 * 60 * 60 * 24));
+        
+        this.totalRecommendations.textContent = totalRecs;
+        this.modelsUsed.textContent = uniqueModels;
+        this.daysActive.textContent = Math.max(daysDiff, 0);
+    }
+    
+    applyFilters() {
+        const searchTerm = this.searchInput.value.toLowerCase();
+        const modelFilter = this.modelFilter.value;
+        const sortOrder = this.sortFilter.value;
+        
+        this.filteredData = this.historyData.filter(item => {
+            const matchesSearch = !searchTerm || 
+                item.input_title.toLowerCase().includes(searchTerm) ||
+                item.model_used.toLowerCase().includes(searchTerm) ||
+                (Array.isArray(item.recommended_titles) && 
+                 item.recommended_titles.some(title => 
+                     title.toLowerCase().includes(searchTerm)
+                 ));
+            
+            const matchesModel = !modelFilter || item.model_used === modelFilter;
+            
+            return matchesSearch && matchesModel;
+        });
+        
+        // Apply sorting
+        this.filteredData.sort((a, b) => {
+            switch (sortOrder) {
+                case 'oldest':
+                    return new Date(a.timestamp) - new Date(b.timestamp);
+                case 'model':
+                    return a.model_used.localeCompare(b.model_used);
+                case 'newest':
+                default:
+                    return new Date(b.timestamp) - new Date(a.timestamp);
+            }
+        });
+        
+        this.currentPage = 1;
+        this.renderHistory();
+    }
+    
+    renderHistory() {
+        this.hideLoading();
+        
+        if (this.filteredData.length === 0) {
+            this.showEmptyState();
+            return;
+        }
+        
+        this.showHistoryList();
+        this.clearAllBtn.style.display = 'inline-flex';
+        
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const pageData = this.filteredData.slice(startIndex, endIndex);
+        
+        this.historyList.innerHTML = pageData.map(item => this.createHistoryItemHTML(item)).join('');
+        this.renderPagination();
+        
+        // Attach click events to history items
+        this.historyList.querySelectorAll('.history-item').forEach((element, index) => {
+            const historyItem = pageData[index];
+            element.addEventListener('click', (e) => {
+                if (!e.target.closest('.history-actions')) {
+                    this.showHistoryDetails(historyItem);
+                }
+            });
+        });
+        
+        // Attach delete button events
+        this.historyList.querySelectorAll('.btn-delete').forEach((btn, index) => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteHistory(pageData[index].id);
+            });
+        });
+    }
+    
+    createHistoryItemHTML(item) {
+        const timestamp = new Date(item.timestamp);
+        const formattedDate = timestamp.toLocaleDateString();
+        const formattedTime = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        const recommendations = Array.isArray(item.recommended_titles) ? item.recommended_titles : [];
+        const previewCount = 3;
+        const hasMore = recommendations.length > previewCount;
+        
+        return `
+            <div class="history-item" data-id="${item.id}">
+                <div class="history-item-header">
+                    <div>
+                        <div class="history-title">${item.input_title}</div>
+                        <div class="history-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                ${formattedDate}
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                ${formattedTime}
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-film"></i>
+                                ${recommendations.length} recommendations
+                            </div>
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <span class="model-badge">${item.model_used}</span>
+                        <button class="history-btn btn-view">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="history-btn btn-delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="recommendations-preview">
+                    ${recommendations.slice(0, previewCount).map(title => 
+                        `<span class="recommendation-tag">${title}</span>`
+                    ).join('')}
+                    ${hasMore ? `<span class="recommendation-tag show-more">+${recommendations.length - previewCount} more</span>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    showHistoryDetails(item) {
+        this.currentHistoryId = item.id;
+        const recommendations = Array.isArray(item.recommended_titles) ? item.recommended_titles : [];
+        const timestamp = new Date(item.timestamp);
+        
+        document.getElementById('modal-title').textContent = `Recommendations for "${item.input_title}"`;
+        
+        const modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = `
+            <div class="modal-info">
+                <div class="info-row">
+                    <strong>Input:</strong> ${item.input_title}
+                </div>
+                <div class="info-row">
+                    <strong>AI Model:</strong> ${item.model_used}
+                </div>
+                <div class="info-row">
+                    <strong>Date:</strong> ${timestamp.toLocaleDateString()} at ${timestamp.toLocaleTimeString()}
+                </div>
+                <div class="info-row">
+                    <strong>Total Recommendations:</strong> ${recommendations.length}
+                </div>
+            </div>
+            
+            <h4 style="margin: 20px 0 15px 0; color: var(--text-primary);">
+                <i class="fas fa-list"></i> All Recommendations
+            </h4>
+            <div class="recommendations-grid">
+                ${recommendations.map(title => 
+                    `<div class="recommendation-item">${title}</div>`
+                ).join('')}
+            </div>
+        `;
+        
+        this.modal.style.display = 'block';
+    }
+    
+    closeModal() {
+        this.modal.style.display = 'none';
+        this.currentHistoryId = null;
+    }      async deleteHistory(historyId) {
+        if (!confirm('Are you sure you want to delete this recommendation history?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/movies/history/delete-single/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ history_id: historyId })
+            });
+              if (!response.ok) {
+                let errorMessage = 'Failed to delete history';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorData.message || `Server error: ${response.status}`;
+                } catch (parseError) {
+                    errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                }
+                throw new Error(errorMessage);
+            }
+            
+            // Remove from local data and re-render
+            this.historyData = this.historyData.filter(item => item.id !== historyId);
+            this.updateStats();
+            this.applyFilters();
+            
+            this.showMessage('History item deleted successfully!', 'success');
+            
+        } catch (error) {
+            console.error('Error deleting history:', error);
+            // Avoid double "Failed to delete history" messages
+            let errorMessage = error.message;
+            if (!errorMessage.includes('Failed to delete history')) {
+                errorMessage = `Failed to delete history item: ${errorMessage}`;
+            }
+            this.showMessage(errorMessage, 'error');
+        }
+    }
+    
+    async deleteCurrentHistory() {
+        if (this.currentHistoryId) {
+            this.closeModal();
+            await this.deleteHistory(this.currentHistoryId);
+        }
+    }      async clearAllHistory() {
+        if (!confirm('Are you sure you want to delete ALL your recommendation history? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            if (this.historyData.length === 0) {
+                this.showMessage('No history to clear.', 'info');
+                return;
+            }
+            
+            const response = await fetch('/api/movies/history/delete-bulk/', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                let errorMessage = 'Failed to clear history';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorData.message || `Server error: ${response.status}`;
+                } catch (parseError) {
+                    errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                }
+                throw new Error(errorMessage);
+            }
+            
+            // Parse the response
+            let result = {};
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                // If no JSON response, that's okay for this operation
+                result = {};
+            }
+            
+            // Clear local data and re-render
+            const deletedCount = result.deleted_count || this.historyData.length;
+            this.historyData = [];
+            this.filteredData = [];
+            this.updateStats();
+            this.renderHistory();
+            
+            this.showMessage(`All history cleared successfully! (${deletedCount} items removed)`, 'success');
+            
+        } catch (error) {
+            console.error('Error clearing history:', error);
+            // Avoid double "Failed to clear history" messages
+            let errorMessage = error.message;
+            if (!errorMessage.includes('Failed to clear history')) {
+                errorMessage = `Failed to clear history: ${errorMessage}`;
+            }
+            this.showMessage(errorMessage, 'error');
+        }
+    }
+    
+    renderPagination() {
+        const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+        
+        if (totalPages <= 1) {
+            this.pagination.innerHTML = '';
+            return;
+        }
+        
+        let paginationHTML = '';
+        
+        // Previous button
+        paginationHTML += `
+            <button class="pagination-btn" ${this.currentPage === 1 ? 'disabled' : ''} 
+                    onclick="historyManager.goToPage(${this.currentPage - 1})">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+        `;
+        
+        // Page numbers
+        const startPage = Math.max(1, this.currentPage - 2);
+        const endPage = Math.min(totalPages, this.currentPage + 2);
+        
+        if (startPage > 1) {
+            paginationHTML += `<button class="pagination-btn" onclick="historyManager.goToPage(1)">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += `<span class="pagination-dots">...</span>`;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <button class="pagination-btn ${i === this.currentPage ? 'active' : ''}" 
+                        onclick="historyManager.goToPage(${i})">
+                    ${i}
+                </button>
+            `;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += `<span class="pagination-dots">...</span>`;
+            }
+            paginationHTML += `<button class="pagination-btn" onclick="historyManager.goToPage(${totalPages})">${totalPages}</button>`;
+        }
+        
+        // Next button
+        paginationHTML += `
+            <button class="pagination-btn" ${this.currentPage === totalPages ? 'disabled' : ''} 
+                    onclick="historyManager.goToPage(${this.currentPage + 1})">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+        
+        this.pagination.innerHTML = paginationHTML;
+    }
+    
+    goToPage(page) {
+        const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+        if (page >= 1 && page <= totalPages) {
+            this.currentPage = page;
+            this.renderHistory();
+        }
+    }
+    
+    showLoading() {
+        this.loadingSection.style.display = 'block';
+        this.emptyState.style.display = 'none';
+        this.historyList.style.display = 'none';
+        this.pagination.style.display = 'none';
+        this.clearAllBtn.style.display = 'none';
+    }
+    
+    hideLoading() {
+        this.loadingSection.style.display = 'none';
+    }
+    
+    showEmptyState() {
+        this.emptyState.style.display = 'block';
+        this.historyList.style.display = 'none';
+        this.pagination.style.display = 'none';
+        this.clearAllBtn.style.display = 'none';
+    }
+    
+    showHistoryList() {
+        this.emptyState.style.display = 'none';
+        this.historyList.style.display = 'flex';
+        this.pagination.style.display = 'flex';
+    }
+    
+    showError(message) {
+        this.hideLoading();
+        this.showMessage(message, 'error');
+        this.showEmptyState();
+    }
+    
+    showMessage(message, type = 'info') {
+        // Create and show a temporary message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert alert-${type}`;
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            max-width: 400px;
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 5000);
+    }
+}
+
+// CSRF Token setup
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Get CSRF token with fallback methods
+function getCSRFToken() {
+    // Try to get from input element first
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput && csrfInput.value) {
+        return csrfInput.value;
+    }
+    
+    // Try to get from cookie
+    const cookieToken = getCookie('csrftoken');
+    if (cookieToken) {
+        return cookieToken;
+    }
+    
+    // Try to get from meta tag
+    const metaToken = document.querySelector('meta[name=csrf-token]');
+    if (metaToken) {
+        return metaToken.getAttribute('content');
+    }
+    
+    console.error('CSRF token not found!');
+    return '';
+}
+
+// Add CSRF token to the page if it doesn't exist
+function ensureCSRFToken() {
+    let csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    
+    if (!csrfInput) {
+        const token = getCookie('csrftoken');
+        if (token) {
+            csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = token;
+            document.body.appendChild(csrfInput);
+        }
+    }
+    
+    return csrfInput ? csrfInput.value : '';
+}
+
+// Initialize the history manager when the page loads
+let historyManager;
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure CSRF token is available
+    ensureCSRFToken();
+    
+    // Initialize history manager
+    historyManager = new HistoryManager();
+});
+</script>
+
+{% endblock %}

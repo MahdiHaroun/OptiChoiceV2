@@ -1,0 +1,166 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login - OptiChoice{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Login to OptiChoice</h2>
+    
+    {% if form.errors %}
+        <div class="alert alert-danger" style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p style="margin: 5px 0;">{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+      <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">Username:</label>
+            {{ form.username }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password">Password:</label>
+            {{ form.password }}
+        </div>
+        
+        <div class="form-group">
+            <label class="checkbox-label">
+                {{ form.remember_me }}
+                Keep me logged in for 2 weeks
+            </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+            Login
+        </button>
+    </form>
+      <div class="auth-links">
+        <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+        <p><a href="{% url 'forgot_password' %}">Forgot your password?</a></p>
+        <p><a href="{% url 'forgot_username' %}">Forgot your Username?</a> </p>
+    </div>
+</div>
+
+<style>
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-links p {
+    margin: 10px 0;
+}
+
+.auth-links a {
+    color: #6a11cb;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+/* Enhanced Mobile Support */
+@media (max-width: 768px) {
+    .auth-container {
+        margin: 20px auto;
+        padding: 30px 20px;
+        max-width: 95%;
+        border-radius: 12px;
+    }
+    
+    .auth-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .form-group input {
+        min-height: 44px;
+        font-size: max(16px, 1rem);
+        padding: 14px 16px;
+        border-radius: 8px;
+    }
+    
+    .btn {
+        min-height: 44px;
+        font-size: 16px;
+        padding: 14px 20px;
+        border-radius: 8px;
+    }
+    
+    .checkbox-label {
+        font-size: 16px;
+        min-height: 44px;
+    }
+    
+    .auth-links {
+        margin-top: 25px;
+    }
+    
+    .auth-links p {
+        margin: 12px 0;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        margin: 15px auto;
+        padding: 25px 15px;
+        max-width: 98%;
+    }
+    
+    .auth-container h2 {
+        font-size: 1.3rem;
+    }
+    
+    .form-group input {
+        padding: 16px 14px;
+    }
+    
+    .btn {
+        padding: 16px 20px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .form-group input,
+    .btn {
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+}
+</style>
+{% endblock %}

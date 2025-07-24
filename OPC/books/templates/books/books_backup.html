@@ -1,0 +1,1738 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Book Recommendations - OptiChoice{% endblock %}
+
+{% block content %}
+<!-- Shared Header -->
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">Book Recommendations</h1>
+        <p class="page-subtitle">Discover your next favorite book with AI-powered recommendations</p>
+    </div>
+</div>
+
+<!-- Shared Navigation -->
+<div class="navigation-section">
+    <div class="nav-container">
+        <a href="{% url 'books:genre_books_page' %}" class="nav-button">
+            <i class="fas fa-tags"></i> Try Genre-Based Recommendations
+        </a>
+    </div>
+</div>
+
+<div class="books-container">
+    <div class="card input-card">
+        <div class="card-header">
+            <h3><i class="fas fa-search"></i> Get Book Recommendations</h3>
+        </div>
+        <div class="card-body">
+            <form id="book-recommendation-form">
+                {% csrf_token %}
+                <div class="form-group search-group">
+                    <label for="book-search" class="form-label"><i class="fas fa-book"></i> Search for a Book:</label>
+                    <input id="book-search" class="form-control book-search-input" type="text" placeholder="Type a book title..." autocomplete="off" />
+                    <small class="form-text text-muted">Enter at least 2 characters</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="model-select" class="form-label"><i class="fas fa-robot"></i> AI Model:</label>
+                        <select id="model-select" class="form-control">
+
+                            
+                            <option value="knn">KNN</option>
+                            
+                            <option value="Embeddings">Embeddings</option>
+                            <option value="NN">Neural Net</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="num-recommendations" class="form-label"><i class="fas fa-list-ol"></i> Number:</label>
+                        <select id="num-recommendations" class="form-control">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary btn-recommend"><i class="fas fa-magic"></i> Recommend</button>
+                    <button type="button" id="regenerate-btn" class="btn btn-secondary btn-regenerate" style="display: none;"><i class="fas fa-sync-alt"></i> Regenerate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Section -->
+    <div id="loading-section" class="loading-section" style="display: none;">
+        <div class="card loading-card">
+            <div class="card-body text-center">
+                <div class="loading-spinner">
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <div class="progress-text">Analyzing your preferences...</div>
+                </div>
+                <h4 class="loading-title">Finding Matches</h4>
+                <p class="loading-text">Using AI to discover books you'll love...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="results-section" style="display: none;">
+        <div class="card results-card">
+            <div class="card-header results-header">
+                <div class="results-title">
+                    <h3><i class="fas fa-stars"></i> Your Recommendations</h3>
+                    <div id="recommendation-info" class="recommendation-info"></div>
+                </div>
+                <div class="results-actions">
+                    <button id="select-all-btn" class="btn btn-outline-primary"><i class="fas fa-check-double"></i> Select All</button>
+                    <button id="save-selected-btn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="recommendations-grid" class="recommendations-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Section -->
+    <div id="error-section" class="error-section" style="display: none;">
+        <div class="card error-card">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+                <h4 class="error-title">Something went wrong</h4>
+                <p id="error-message" class="error-message"></p>
+                <button onclick="resetForm()" class="btn btn-primary"><i class="fas fa-redo"></i> Try Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* --- SHARED STYLES START --- */
+:root {
+    --primary: #6366f1;
+    --primary-light: #a5b4fc;
+    --primary-dark: #3730a3;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --bg-dark: #18181b;
+    --border: #e5e7eb;
+    --border-dark: #232336;
+    --card-bg: #ffffff;
+    --card-bg-dark: #232336;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --text-dark: #f3f4f6;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.18), 0 1px 2px -1px rgb(0 0 0 / 0.18);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.18), 0 4px 6px -4px rgb(0 0 0 / 0.18);
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    --gradient-success: linear-gradient(135deg, #34d399 0%, #34d399 100%);
+    --card-hover-dark: #282a36;
+    --btn-hover-dark: #3b3e5a;
+    --input-hover-dark: #23234a;
+    --primary-hover-dark: #818cf8;
+}
+[data-theme="dark"] {
+    --bg: #18181b;
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --text: var(--text-dark);
+}
+
+/* Dark theme card hover */
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .input-card:hover,
+[data-theme="dark"] .results-card:hover {
+    background: var(--card-hover-dark);
+    box-shadow: 0 4px 24px 0 rgba(129,140,248,0.10);
+    border-color: var(--primary-hover-dark);
+}
+
+/* Dark theme button hover */
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-outline-primary:hover {
+    background: var(--primary-hover-dark);
+    color: #fff;
+    border-color: var(--primary-hover-dark);
+    box-shadow: 0 2px 12px 0 rgba(129,140,248,0.18);
+}
+[data-theme="dark"] .btn-secondary:hover {
+    background: var(--btn-hover-dark);
+    color: #fff;
+}
+[data-theme="dark"] .btn-success:hover {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: #fff;
+}
+
+/* Dark theme input hover/focus */
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-control:hover,
+[data-theme="dark"] .book-search-input:focus,
+[data-theme="dark"] .book-search-input:hover {
+    border-color: var(--primary-hover-dark);
+    background: var(--input-hover-dark);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--primary-hover-dark);
+}
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .book-search-input {
+    background: var(--card-hover-dark);
+    color: #fff;
+    border-color: var(--border-dark);
+}
+
+/* Modern Search Box */
+.book-search-input {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    padding: 0.5rem 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.book-search-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* Enhanced Page Layout */
+.page-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 12px 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: headerShimmer 4s infinite;
+}
+
+@keyframes headerShimmer {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Navigation Section */
+.navigation-section {
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.nav-button i {
+    font-size: 1.1rem;
+}
+
+
+
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin: 0;
+    animation: slideInFromBottom 0.8s ease-out 0.2s both;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+@keyframes slideInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromBottom {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 0.95;
+        transform: translateY(0);
+    }
+}
+
+.books-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+}
+
+/* Enhanced Cards */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+}
+
+.card-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Enhanced Form Styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--card-bg);
+    color: var(--text);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: var(--shadow), 0 0 0 3px rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-control:hover {
+    border-color: var(--primary-light);
+}
+
+/* Enhanced Select2 Styling */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--multiple {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    min-height: 60px;
+    background: var(--card-bg);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--primary);
+    box-shadow: var(--shadow), 0 0 0 3px rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
+}
+
+.select2-container--default .select2-selection--multiple:hover {
+    border-color: var(--primary-light);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 0.4rem 0.75rem;
+    margin: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Enhanced Buttons */
+.btn {
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+    position: relative;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Enhanced Loading Animation with Progress Bar */
+.loading-card {
+    background: var(--gradient-primary);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.loading-spinner {
+    margin: 1.5rem auto;
+    width: 100%;
+    max-width: 300px;
+    position: relative;
+}
+
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), white, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoad {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
+}
+
+.loading-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.9;
+    animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+}
+
+/* Results Section */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.results-title h3 {
+    margin: 0 0 1rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.recommendation-info {
+    background: rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Recommendations Grid */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Book Cards */
+.book-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: slideInCard 0.5s ease-out both;
+}
+
+.book-card:nth-child(1) { animation-delay: 0.1s; }
+.book-card:nth-child(2) { animation-delay: 0.2s; }
+.book-card:nth-child(3) { animation-delay: 0.3s; }
+.book-card:nth-child(4) { animation-delay: 0.4s; }
+.book-card:nth-child(5) { animation-delay: 0.5s; }
+.book-card:nth-child(6) { animation-delay: 0.6s; }
+.book-card:nth-child(7) { animation-delay: 0.7s; }
+.book-card:nth-child(8) { animation-delay: 0.8s; }
+.book-card:nth-child(9) { animation-delay: 0.9s; }
+.book-card:nth-child(10) { animation-delay: 1s; }
+
+@keyframes slideInCard {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.book-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.book-card:hover::before {
+    left: 0;
+}
+
+.book-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.1) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.book-card.selected::before {
+    left: 0;
+    background: var(--gradient-success);
+}
+
+/* Enhanced Checkbox Styling */
+.book-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    z-index: 2;
+    accent-color: var(--primary);
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.book-checkbox:hover {
+    transform: scale(1.2);
+}
+
+.book-checkbox:checked {
+    animation: checkboxPulse 0.3s ease;
+}
+
+@keyframes checkboxPulse {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+}
+
+/* Enhanced Book Title */
+.book-title {
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-right: 2.5rem;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+}
+
+.book-card:hover .book-title {
+    color: var(--primary);
+}
+
+/* Enhanced Input Source */
+.input-source {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(129, 140, 248, 0.12) 100%);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.input-source::before {
+    content: '📚';
+    font-style: normal;
+    opacity: 0.7;
+}
+
+.book-card:hover .input-source {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(129, 140, 248, 0.16) 100%);
+    border-left-color: var(--primary);
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.no-results i {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+}
+
+.no-results h4 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.no-results p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* Error Section */
+.error-card {
+    background: var(--danger);
+    color: white;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.error-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.error-message {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+/* Form Text */
+.form-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Autocomplete Styles */
+.autocomplete-suggestions {
+    position: absolute;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 2px;
+    padding: 0.25rem 0;
+}
+.autocomplete-suggestion {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1rem;
+    transition: background 0.15s;
+}
+.autocomplete-suggestion:hover, .autocomplete-suggestion.active {
+    background: var(--primary);
+    color: #fff;
+}
+.search-group { position: relative; }
+
+/* Book Title */
+.book-title {
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    margin-right: 3rem;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+}
+
+.book-card:hover .book-title {
+    color: var(--primary);
+}
+
+/* Input Source */
+.input-source {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(165, 180, 252, 0.12) 100%);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.input-source::before {
+    content: '📚';
+    font-style: normal;
+    opacity: 0.7;
+    font-size: 1rem;
+}
+
+.book-card:hover .input-source {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(165, 180, 252, 0.16) 100%);
+    border-left-color: var(--primary);
+}
+
+/* No Results */
+.no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.no-results h4 {
+    color: var(--text);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.no-results p {
+    font-size: 1rem;
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+/* Error Section */
+.error-card {
+    background: var(--danger);
+    color: white;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+/* Form Text */
+.form-text {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+/* Autocomplete */
+.autocomplete-suggestions {
+    position: absolute;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 2px;
+    padding: 0.5rem 0;
+}
+
+.autocomplete-suggestion {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1rem;
+    transition: background 0.15s;
+}
+
+.autocomplete-suggestion:hover, 
+.autocomplete-suggestion.active {
+    background: var(--primary);
+    color: white;
+}
+
+.search-group { 
+    position: relative; 
+}
+
+/* Text Center Utility */
+.text-center {
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .results-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .results-actions {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .books-container {
+        padding: 1rem 0.5rem;
+    }
+}
+</style>
+
+
+
+
+<script>
+// Simple variables for beginners - these store important data
+var currentRequestData = null;        // Stores the current book recommendation request
+var updateCounterTimeout;             // Timer for updating selected book counter
+var isRequestInProgress = false;      // Prevents multiple requests at once
+
+// Simple cache to remember search results
+var searchResults = {};               // Stores previous search results
+var lastSearchTerm = '';              // Remembers the last search term
+
+// Clean up old search results every 30 seconds to save memory
+setInterval(function() {
+    if (Object.keys(searchResults).length > 50) {
+        searchResults = {};
+    }
+}, 30000);
+
+// When the webpage loads completely, setup all the features
+$(document).ready(function() {
+    
+    // Setup what happens when user submits the form
+    setupFormSubmission();
+    
+    // Setup what happens when user clicks on book cards
+    setupBookCardSelection();
+    
+    // Setup the "Select All" button
+    setupSelectAllButton();
+    
+    // Setup the "Save Selected" button
+    setupSaveButton();
+    
+    // Setup the "Regenerate" button
+    setupRegenerateButton();
+    
+    // Setup autocomplete for book search
+    setupBookSearchAutocomplete();
+});
+
+// Function to setup book search autocomplete
+function setupBookSearchAutocomplete() {
+    let debounceTimeout;
+    let selectedIndex = -1;
+    let suggestions = [];
+    const $input = $('#book-search');
+    const $group = $input.closest('.search-group');
+    // Remove any old suggestion box
+    $group.find('.autocomplete-suggestions').remove();
+    // Create suggestion box
+    const $suggestionsBox = $('<div class="autocomplete-suggestions" style="display:none;"></div>');
+    $group.append($suggestionsBox);
+
+    $input.on('input', function() {
+        const val = $input.val();
+        $suggestionsBox.empty().hide();
+        selectedIndex = -1;
+        if (val.length < 2) return;
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(function() {
+            $.get('{% url "books:book_search" %}', { search: val, limit: 8 }, function(data) {
+                suggestions = (data.results || []).map(b => b.title);
+                if (suggestions.length === 0) return;
+                $suggestionsBox.empty();
+                suggestions.forEach((title, idx) => {
+                    const $item = $('<div class="autocomplete-suggestion"></div>').text(title);
+                    $item.on('mousedown', function(e) {
+                        e.preventDefault();
+                        $input.val(title);
+                        $suggestionsBox.hide();
+                    });
+                    $suggestionsBox.append($item);
+                });
+                $suggestionsBox.show();
+            }).fail(function(xhr, status, error) {
+                console.log('Search failed:', error);
+                $suggestionsBox.hide();
+            });
+        }, 200);
+    });
+    $input.on('keydown', function(e) {
+        if (!$suggestionsBox.is(':visible')) return;
+        if (e.key === 'ArrowDown') {
+            selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+            $suggestionsBox.children().removeClass('active').eq(selectedIndex).addClass('active');
+            e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            $suggestionsBox.children().removeClass('active').eq(selectedIndex).addClass('active');
+            e.preventDefault();
+        } else if (e.key === 'Enter') {
+            if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                $input.val(suggestions[selectedIndex]);
+                $suggestionsBox.hide();
+                e.preventDefault();
+            }
+        } else if (e.key === 'Escape') {
+            $suggestionsBox.hide();
+        }
+    });
+    $input.on('blur', function() {
+        setTimeout(() => $suggestionsBox.hide(), 150);
+    });
+}
+
+// Function to handle what happens when user submits the form
+function setupFormSubmission() {
+    $('#book-recommendation-form').on('submit', function(e) {
+        e.preventDefault();                                   // Stop normal form submission
+        
+        // Don't allow multiple requests at the same time
+        if (isRequestInProgress) {
+            showSimpleMessage('Please wait for the current request to finish.', 'warning');
+            return;
+        }
+          // Get the book that user selected
+        var selectedBook = $('#book-search').val();
+        if (!selectedBook) {
+            showSimpleMessage('Please select a book.', 'warning');
+            return;
+        }
+        
+        // Prepare the data to send to the server
+        currentRequestData = {
+            book_title: selectedBook,                       // Single book user selected
+            num_recommendations: parseInt($('#num-recommendations').val()),  // How many recommendations
+            model_used: $('#model-select').val(),             // Which AI model to use
+            save_history: false,                              // Don't save to history yet
+            regenerate: false                                 // This is not a regeneration
+        };
+
+        // Show the loading animation to user
+        showSection('loading');
+        isRequestInProgress = true;                           // Mark that request is running
+
+        // Send request to the server to get recommendations
+        $.ajax({
+            url: '{% url "books:book_recommendation" %}',                    // Server endpoint
+            type: 'POST',                                     // POST method
+            data: JSON.stringify(currentRequestData),         // Convert data to JSON string
+            contentType: 'application/json',                 // Tell server we're sending JSON
+            headers: {
+                'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()  // Security token
+            },
+            success: function(response) {
+                // This runs when server successfully returns recommendations
+                showRecommendations(response, currentRequestData);
+                $('#regenerate-btn').show();                  // Show regenerate button
+            },
+            error: function(xhr, status, error) {
+                // This runs when something goes wrong
+                var errorMessage = 'Failed to get recommendations. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                showError(errorMessage);
+            },
+            complete: function() {
+                // This always runs at the end, success or failure
+                isRequestInProgress = false;                  // Mark that request is finished
+            }
+        });
+    });
+}
+
+// Function to handle clicking on book cards
+function setupBookCardSelection() {
+    $(document).on('change', '.book-checkbox', function() {
+        var checkbox = $(this);                               // The checkbox that was clicked
+        var bookCard = checkbox.closest('.book-card');     // The book card containing it
+        
+        // Add or remove the 'selected' visual style
+        if (checkbox.is(':checked')) {
+            bookCard.addClass('selected');                   // Make it look selected
+        } else {
+            bookCard.removeClass('selected');               // Remove selected look
+        }
+        
+        // Update the counter showing how many books are selected
+        // Use a small delay to avoid updating too frequently
+        clearTimeout(updateCounterTimeout);
+        updateCounterTimeout = setTimeout(updateSelectedCount, 50);
+    });
+}
+
+// Function to handle the "Select All" button
+function setupSelectAllButton() {
+    $('#select-all-btn').on('click', function() {
+        var allCheckboxes = $('.book-checkbox');            // All book checkboxes
+        var checkedCheckboxes = $('.book-checkbox:checked'); // Only checked ones
+        var allCards = $('.book-card');                     // All book cards
+        
+        // Check if all books are already selected
+        var allSelected = (allCheckboxes.length === checkedCheckboxes.length);
+        
+        if (allSelected) {
+            // If all are selected, unselect them all
+            allCheckboxes.prop('checked', false);
+            allCards.removeClass('selected');
+            $(this).text('Select All');
+        } else {
+            // If not all are selected, select them all
+            allCheckboxes.prop('checked', true);
+            allCards.addClass('selected');
+            $(this).text('Unselect All');
+        }
+        
+        updateSelectedCount();                                // Update the counter
+    });
+}
+
+// Function to handle the "Save Selected" button
+function setupSaveButton() {
+    $('#save-selected-btn').on('click', function() {
+        var selectedBooks = [];                              // Array to store selected books
+        var selectedTitles = [];                              // Array to store just the titles
+        
+        // Go through each checked checkbox and get the book info
+        $('.book-checkbox:checked').each(function() {
+            var card = $(this).closest('.book-card');
+            var title = card.find('.book-title').text().trim();
+            
+            selectedBooks.push({
+                title: title
+            });
+            selectedTitles.push(title);
+        });
+
+        // Check if user selected any books
+        if (selectedBooks.length === 0) {
+            showSimpleMessage('Please select at least one book to save to your history.', 'warning');
+            return;
+        }
+
+        // Ask user to confirm they want to save
+        var confirmMessage = 'Save ' + selectedBooks.length + ' selected book';
+        if (selectedBooks.length > 1) {
+            confirmMessage += 's';
+        }
+        confirmMessage += ' to your recommendation history?';
+        
+        if (!confirm(confirmMessage)) {
+            return;                                           // User cancelled
+        }
+
+        // Change button to show it's working
+        var saveButton = $(this);
+        var originalText = saveButton.html();
+        saveButton.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);        // Prepare data to send to server
+        var saveData = {
+            input_title: currentRequestData.book_title,  // Original book user picked
+            selected_recommendations: {},
+            model_used: currentRequestData.model_used
+        };
+        
+        // Add selected recommendations to the data
+        saveData.selected_recommendations[currentRequestData.book_title] = selectedTitles;
+
+        // Debug: log the data being sent
+        console.log('Saving data:', saveData);
+        console.log('currentRequestData:', currentRequestData);
+
+        // Send save request to server
+        $.ajax({
+            url: '{% url "books:save_recommendations" %}',
+            type: 'POST',
+            data: JSON.stringify(saveData),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                // Show success message
+                var successMessage = '🎉 Successfully saved ' + selectedBooks.length + ' book';
+                if (selectedBooks.length > 1) {
+                    successMessage += 's';
+                }
+                successMessage += ' to your history!';
+                showSimpleMessage(successMessage, 'success');
+                
+                // Clear all selections
+                $('.book-checkbox:checked').each(function() {
+                    var card = $(this).closest('.book-card');
+                    card.removeClass('selected');
+                    $(this).prop('checked', false);
+                });
+                
+                $('#select-all-btn').html('<i class="fas fa-check-double"></i> Select All');
+                updateSelectedCount();
+            },
+            error: function(xhr, status, error) {
+                // Show error message
+                var errorMessage = 'Failed to save recommendations. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                showSimpleMessage('❌ ' + errorMessage, 'error');
+            },
+            complete: function() {
+                // Reset button back to normal
+                saveButton.html(originalText).prop('disabled', false);
+            }
+        });
+    });
+}
+
+// Function to handle the "Regenerate" button
+function setupRegenerateButton() {
+    $('#regenerate-btn').on('click', function(e) {
+        e.preventDefault();                                   // Stop normal button behavior
+        
+        // Check if we have a previous request to regenerate
+        if (!currentRequestData) {
+            showSimpleMessage('No previous request to regenerate.', 'warning');
+            return;
+        }
+        
+        // Don't allow multiple requests at once
+        if (isRequestInProgress) {
+            showSimpleMessage('Please wait for the current request to complete.', 'warning');
+            return;
+        }
+
+        // Mark this as a regeneration request
+        currentRequestData.regenerate = true;
+
+        // Show loading screen
+        showSection('loading');
+        isRequestInProgress = true;
+
+        // Change button to show it's working
+        var regenerateBtn = $(this);
+        var originalText = regenerateBtn.html();
+        regenerateBtn.html('<i class="fas fa-spinner fa-spin"></i> Regenerating...').prop('disabled', true);
+
+        // Send regeneration request to server
+        $.ajax({
+            url: '{% url "books:book_recommendation" %}',
+            type: 'POST',
+            data: JSON.stringify(currentRequestData),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                // Show the new recommendations
+                showRecommendations(response, currentRequestData);
+                showSimpleMessage('✨ Recommendations regenerated successfully!', 'success');
+            },
+            error: function(xhr, status, error) {
+                // Show error message
+                var errorMessage = 'Failed to regenerate recommendations. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                showError(errorMessage);
+            },
+            complete: function() {
+                // Reset button and flags
+                regenerateBtn.html(originalText).prop('disabled', false);
+                currentRequestData.regenerate = false;        // Reset for next time
+                isRequestInProgress = false;
+            }
+        });
+    });
+}
+
+// Function to display book recommendations to the user
+function showRecommendations(data, requestData) {
+    showSection('results');                                   // Show the results section
+    
+    // Process the response from server - recommendations come as a dictionary
+    // where keys are input books and values are arrays of recommended books
+    var allRecommendations = [];                              // Store all recommendations here
+    var totalCount = 0;                                       // Count total recommendations
+    
+    // Go through each input book and get its recommendations
+    if (data.recommendations && typeof data.recommendations === 'object') {
+        var inputBookKeys = Object.keys(data.recommendations);
+        for (var i = 0; i < inputBookKeys.length; i++) {
+            var inputBook = inputBookKeys[i];
+            var recommended = data.recommendations[inputBook];
+            
+            if (Array.isArray(recommended)) {
+                // Add each recommended book to our list
+                for (var j = 0; j < recommended.length; j++) {
+                    allRecommendations.push({
+                        title: recommended[j],
+                        inputBook: inputBook                 // Remember which input generated this
+                    });
+                    totalCount++;
+                }
+            }
+        }
+    }
+      // Build the information section showing details about the request
+    var infoHtml = '';
+    infoHtml += '<div class="info-item"><strong>Based on:</strong> ' + requestData.book_title + '</div>';
+    infoHtml += '<div class="info-item"><strong>AI Model:</strong> ' + requestData.model_used + '</div>';
+    infoHtml += '<div class="info-item"><strong>Found:</strong> ' + totalCount + ' recommendations</div>';
+    
+    if (data.regenerated) {
+        infoHtml += '<div class="info-item"><strong>Status:</strong> Regenerated</div>';
+    }
+    
+    $('#recommendation-info').html(infoHtml);
+    
+    // Build the HTML for showing all recommendations
+    var recommendationsHtml = '';
+    
+    if (allRecommendations.length === 0) {
+        // No recommendations found
+        recommendationsHtml = '<div class="no-results">';
+        recommendationsHtml += '<h4>No recommendations found</h4>';
+        recommendationsHtml += '<p>Try different books or a different AI model.</p>';
+        recommendationsHtml += '</div>';
+    } else {
+        // Build book cards for each recommendation
+        for (var k = 0; k < allRecommendations.length; k++) {
+            var book = allRecommendations[k];
+            
+            recommendationsHtml += '<div class="book-card" data-book-index="' + k + '">';
+            recommendationsHtml += '<input type="checkbox" class="book-checkbox" id="book-' + k + '">';
+            recommendationsHtml += '<div class="book-title">' + book.title + '</div>';
+            
+            if (book.inputBook) {
+                recommendationsHtml += '<div class="input-source">Based on: ' + book.inputBook + '</div>';
+            }
+            
+            recommendationsHtml += '</div>';
+        }    }
+    
+    // Update the page with all the recommendations at once (better for performance)
+    $('#recommendations-grid').html(recommendationsHtml);
+    updateSelectedCount();                                    // Update the selection counter
+    
+    // Smooth scroll to results section with a slight delay for better UX
+    setTimeout(function() {
+        $('html, body').animate({
+            scrollTop: $('#results-section').offset().top - 20
+        }, 800, 'swing');
+    }, 300);
+}
+
+// Function to show error messages to the user
+function showError(message) {
+    showSection('error');                                     // Show the error section
+    $('#error-message').text(message);                       // Display the error message
+}
+
+// Function to reset the form back to the beginning
+function resetForm() {
+    showSection('input');                                     // Show the input section
+    $('#book-search').val(null).trigger('change');          // Clear selected book
+    $('#model-select').val('tfidf');                         // Reset to default model
+    $('#num-recommendations').val('10');                     // Reset to default number
+    $('#regenerate-btn').hide();                             // Hide regenerate button
+    currentRequestData = null;                               // Clear stored request data
+}
+
+// Function to show and hide different sections of the page
+function showSection(section) {
+    var sections = ['input', 'loading', 'results', 'error']; // List of all sections
+    
+    // Go through each section and show/hide appropriately
+    for (var i = 0; i < sections.length; i++) {
+        var currentSection = sections[i];
+        
+        if (currentSection === section) {
+            // Show this section
+            if (currentSection === 'input') {
+                $('.input-section').show();
+            } else {
+                $('#' + currentSection + '-section').show();
+            }
+        } else {
+            // Hide this section
+            if (currentSection === 'input') {
+                $('.input-section').show();                  // Always keep input visible
+            } else {
+                $('#' + currentSection + '-section').hide();
+            }
+        }
+    }
+}
+
+// Function to update the counter showing how many books are selected
+function updateSelectedCount() {
+    // Get information about selected books
+    var selectedCheckboxes = $('.book-checkbox:checked');   // All checked checkboxes
+    var totalCheckboxes = $('.book-checkbox');              // All checkboxes
+    var selectedCount = selectedCheckboxes.length;           // How many are selected
+    var totalCount = totalCheckboxes.length;                 // How many total
+    
+    // Update the counter display
+    var selectedCountElement = $('#selected-count');
+    if (selectedCountElement.length) {
+        selectedCountElement.text(selectedCount);
+    }
+    
+    // Show or hide the save button based on selection
+    var saveButton = $('#save-selected-btn');
+    if (selectedCount > 0) {
+        saveButton.show();                                    // Show save button
+    } else {
+        saveButton.hide();                                    // Hide save button
+    }
+    
+    // Update the Select All button text
+    var selectAllButton = $('#select-all-btn');
+    if (selectedCount === totalCount && totalCount > 0) {
+        selectAllButton.text('Unselect All');                // All are selected
+    } else {
+        selectAllButton.text('Select All');                  // Not all are selected
+    }
+}
+
+// Enhanced function to show beautiful messages to the user
+function showSimpleMessage(message, type) {
+    // Define colors and icons for different message types
+    var messageConfig = {
+        success: { 
+            color: '#10b981', 
+            bg: '#ecfdf5', 
+            icon: '✓',
+            borderColor: '#10b981'
+        },
+        error: { 
+            color: '#ef4444', 
+            bg: '#fef2f2', 
+            icon: '✕',
+            borderColor: '#ef4444'
+        },
+        warning: { 
+            color: '#f59e0b', 
+            bg: '#fffbeb', 
+            icon: '⚠',
+            borderColor: '#f59e0b'
+        },
+        info: { 
+            color: '#3b82f6', 
+            bg: '#eff6ff', 
+            icon: 'ℹ',
+            borderColor: '#3b82f6'
+        }
+    };
+    
+    var config = messageConfig[type] || messageConfig.info;
+    
+    // Remove any existing messages first with animation
+    $('.notification').each(function() {
+        var notification = $(this);
+        notification.css({
+            'transform': 'translateX(100%)',
+            'opacity': '0'
+        });
+        setTimeout(function() {
+            notification.remove();
+        }, 300);
+    });
+    
+    // Create the enhanced message element
+    var messageHtml = '<div class="notification notification-' + type + '" style="';
+    messageHtml += 'position: fixed; top: 20px; right: 20px; ';
+    messageHtml += 'background: ' + config.bg + '; ';
+    messageHtml += 'border: 1px solid ' + config.borderColor + '; ';
+    messageHtml += 'border-left: 4px solid ' + config.borderColor + '; ';
+    messageHtml += 'border-radius: 8px; ';
+    messageHtml += 'padding: 1rem 1.25rem; ';
+    messageHtml += 'max-width: 350px; ';
+    messageHtml += 'z-index: 9999; ';
+    messageHtml += 'color: ' + config.color + '; ';
+    messageHtml += 'font-weight: 500; ';
+    messageHtml += 'box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); ';
+    messageHtml += 'transform: translateX(100%); ';
+    messageHtml += 'transition: all 0.3s ease; ';
+    messageHtml += 'font-size: 0.9rem; ';
+    messageHtml += 'line-height: 1.4; ';
+    messageHtml += 'display: flex; ';
+    messageHtml += 'align-items: flex-start; ';
+    messageHtml += 'gap: 0.75rem;">';
+    
+    messageHtml += '<span style="font-size: 1.1rem; flex-shrink: 0; margin-top: 1px;">' + config.icon + '</span>';
+    messageHtml += '<span style="flex: 1;">' + message + '</span>';
+    messageHtml += '<button onclick="removeNotification(this)" style="';
+    messageHtml += 'background: none; border: none; color: ' + config.color + '; ';
+    messageHtml += 'cursor: pointer; padding: 0; font-size: 1.2rem; ';
+    messageHtml += 'flex-shrink: 0; opacity: 0.7; transition: opacity 0.2s ease;"';
+    messageHtml += 'onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">'; 
+    messageHtml += '×</button>';
+    messageHtml += '</div>';
+    
+    var notification = $(messageHtml);
+    $('body').append(notification);
+    
+    // Animate in
+    setTimeout(function() {
+        notification.css('transform', 'translateX(0)');
+    }, 50);
+    
+    // Automatically remove the message after 5 seconds
+    setTimeout(function() {
+        if (notification.length) {
+            removeNotification(notification.find('button')[0]);
+        }
+    }, 5000);
+}
+
+// Function to remove notification with animation
+function removeNotification(button) {
+    var notification = $(button).parent();
+    notification.css({
+        'transform': 'translateX(100%)',
+        'opacity': '0'
+    });
+    setTimeout(function() {
+        notification.remove();
+    }, 300);
+}
+
+// Add some basic styling for the Select2 dropdown to make it look better
+// This only runs once to avoid performance issues
+if (!$('#select2-custom-styles').length) {
+    var styleHtml = '<style id="select2-custom-styles">';
+    styleHtml += '.select2-dropdown { border: 1px solid var(--border) !important; border-radius: 4px !important; }';
+    styleHtml += '.select2-dropdown .select2-search__field { border: 1px solid var(--border) !important; ';
+    styleHtml += 'border-radius: 4px !important; padding: 0.4rem !important; background: var(--bg) !important; }';
+    styleHtml += '.select2-results__option--highlighted { background: var(--primary) !important; color: white !important; }';
+    styleHtml += '</style>';
+    
+    $('head').append(styleHtml);
+}
+</script>
+{% endblock %}
