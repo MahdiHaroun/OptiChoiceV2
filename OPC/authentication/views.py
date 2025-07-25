@@ -37,11 +37,21 @@ def login_view(request):
         return redirect('dashboard')
 
     form = LoginForm(request.POST or None)
+    
+    # Debug: Print form data and errors
+    if request.method == 'POST':
+        print(f"DEBUG: Form data: {request.POST}")
+        print(f"DEBUG: Form is valid: {form.is_valid()}")
+        if not form.is_valid():
+            print(f"DEBUG: Form errors: {form.errors}")
 
     if request.method == 'POST' and form.is_valid():
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']
         remember_me = form.cleaned_data['remember_me']
+        
+        # Debug: Print remember_me value
+        print(f"DEBUG: remember_me value: {remember_me}")
 
         user = authenticate(request, username=username, password=password)
         if user:
@@ -52,7 +62,10 @@ def login_view(request):
 
             login(request, user)
 
-            request.session.set_expiry(1209600 if remember_me else 0)
+            # Debug: Print session expiry
+            expiry_time = 1209600 if remember_me else 0
+            print(f"DEBUG: Setting session expiry to: {expiry_time} seconds")
+            request.session.set_expiry(expiry_time)
 
             tokens = get_jwt_tokens(username, password)
             if tokens:
