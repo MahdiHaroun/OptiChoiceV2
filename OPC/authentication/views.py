@@ -101,7 +101,7 @@ def register_view(request):
             request.session[f'pending_registration_{temp_token}'] = registration_data
             
             # Create activation URL
-            activation_url = f"http://142.93.168.121/activate-registration/{temp_token}/"
+            activation_url = f"https://www.optichoice.me/activate-registration/{temp_token}/"
             # Send simple activation email using Django's send_mail
             subject = 'Activate Your OptiChoice Account'
             name_to_use = first_name if first_name else username
@@ -248,7 +248,7 @@ def forgot_password_view(request):
                 user_profile.save()
                 
                 # Create password reset URL using Django's built-in token generator
-                reset_url = f"http://142.93.168.121/password-reset-confirm/{user.pk}/{default_token_generator.make_token(user)}/"
+                reset_url = f"https://www.optichoice.me/password-reset-confirm/{user.pk}/{default_token_generator.make_token(user)}/"
                 
                 # Send simple password reset email
                 subject = 'Reset Your OptiChoice Password'
@@ -366,7 +366,7 @@ def forgot_username_view(request):
                 user_profile.save()
                 
                 # Create username reminder URL
-                reminder_url = f"http://142.93.168.121/reset_username_confirmation_view/{user.pk}/{default_token_generator.make_token(user)}/"
+                reminder_url = f"https://www.optichoice.me/reset_username_confirmation_view/{user.pk}/{default_token_generator.make_token(user)}/"
                 
                 # Send simple username reminder email
                 subject = 'Your OptiChoice Username'
@@ -471,7 +471,7 @@ def delete_account_view(request):
                 user_profile.save()
                 
                 # Create account deletion confirmation URL
-                deletion_url = f"http://142.93.168.121/delete-account-confirm/{user.pk}/{default_token_generator.make_token(user)}/"
+                deletion_url = f"https://www.optichoice.me/delete-account-confirm/{user.pk}/{default_token_generator.make_token(user)}/"
                 
                 # Send account deletion confirmation email
                 subject = 'Confirm Account Deletion - OptiChoice'
