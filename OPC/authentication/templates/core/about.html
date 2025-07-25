@@ -4,6 +4,49 @@
 
 {% block content %}
 <style>
+/* CSS Variables for theming */
+:root {
+    --primary: #667eea;
+    --primary-dark: #5a0fb8;
+    --bg: #f8fafc;
+    --bg-dark: #18181b;
+    --card-bg: #ffffff;
+    --card-bg-dark: #232336;
+    --text: #333;
+    --text-light: #666;
+    --text-muted: #999;
+    --text-dark: #f3f4f6;
+    --text-light-dark: #b0b0b0;
+    --border: #e5e7eb;
+    --border-dark: #232336;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --feature-bg: #f8f9ff;
+    --feature-bg-dark: #2a2a2a;
+    --feature-border: #e8eeff;
+    --feature-border-dark: #3a3a3a;
+    --algorithm-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --algorithm-bg-dark: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+    --get-started-bg: #f0f8ff;
+    --get-started-bg-dark: #2a3a4a;
+    --get-started-border: #4169e1;
+    --get-started-border-dark: #5a7de1;
+}
+
+[data-theme="dark"] {
+    --bg: var(--bg-dark);
+    --card-bg: var(--card-bg-dark);
+    --text: var(--text-dark);
+    --text-light: var(--text-light-dark);
+    --border: var(--border-dark);
+    --shadow: var(--shadow-dark);
+    --feature-bg: var(--feature-bg-dark);
+    --feature-border: var(--feature-border-dark);
+    --algorithm-bg: var(--algorithm-bg-dark);
+    --get-started-bg: var(--get-started-bg-dark);
+    --get-started-border: var(--get-started-border-dark);
+}
+
 @keyframes logo-shine {
     0%   { box-shadow: 0 0 48px 16px #eb0707, 0 0 0 8px #df8303; }
     25%  { box-shadow: 0 0 48px 16px #df8303, 0 0 0 8px #1f09e4; }
@@ -14,7 +57,7 @@
 
 .about-logo {
     width: 200px;
-    margin-bottom: 15rem;
+    margin-bottom: 1rem;
     border-radius: 20px;
     animation: logo-shine 8s linear infinite;
 }
@@ -73,10 +116,11 @@
 
 .main-content {
     flex: 1;
-    background: white;
+    background: var(--card-bg);
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
+    color: var(--text);
 }
 
 .section {
@@ -85,15 +129,15 @@
 }
 
 .section h2 {
-    color: #333;
-    border-bottom: 3px solid #667eea;
+    color: var(--text);
+    border-bottom: 3px solid var(--primary);
     padding-bottom: 0.5rem;
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
 }
 
 .section h3 {
-    color: #555;
+    color: var(--text-light);
     margin-top: 2rem;
     margin-bottom: 1rem;
     font-size: 1.4rem;
@@ -101,17 +145,17 @@
 
 .section p {
     line-height: 1.8;
-    color: #666;
+    color: var(--text-light);
     margin-bottom: 1rem;
     font-size: 1.1rem;
 }
 
 .algorithm-card {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--algorithm-bg);
     border-radius: 12px;
     padding: 1.5rem;
     margin: 1rem 0;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--primary);
     transition: transform 0.3s ease;
 }
 
@@ -120,13 +164,14 @@
 }
 
 .algorithm-card h4 {
-    color: #333;
+    color: var(--text);
     margin-bottom: 0.8rem;
     font-size: 1.3rem;
 }
 
 .algorithm-card p {
     margin-bottom: 0.5rem;
+    color: var(--text-light);
 }
 
 .hero-section {
@@ -146,18 +191,27 @@
 }
 
 .feature-item {
-    background: #f8f9ff;
+    background: var(--feature-bg);
     padding: 1.5rem;
     border-radius: 12px;
     text-align: center;
-    border: 2px solid #e8eeff;
+    border: 2px solid var(--feature-border);
     transition: all 0.3s ease;
+    color: var(--text);
 }
 
 .feature-item:hover {
-    border-color: #667eea;
+    border-color: var(--primary);
     transform: translateY(-3px);
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+}
+
+.feature-item h4 {
+    color: var(--text);
+}
+
+.feature-item p {
+    color: var(--text-light);
 }
 
 .feature-icon {
@@ -178,6 +232,15 @@
     .main-content {
         padding: 1rem;
     }
+}
+
+/* Dark theme enhancements */
+[data-theme="dark"] .table-of-contents {
+    background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 100%);
+}
+
+[data-theme="dark"] .hero-section {
+    background: linear-gradient(135deg, #4a4a4a 0%, #5a5a5a 100%);
 }
 </style>
 
@@ -236,7 +299,7 @@
             <p>
                 OptiChoice uses multiple AI algorithms to understand your preferences and provide accurate recommendations:
             </p>
-            <ol style="font-size: 1.1rem; line-height: 1.8; color: #666;">
+            <ol style="font-size: 1.1rem; line-height: 1.8; color: var(--text-light);">
                 <li><strong>Input Your Preferences:</strong> Tell us what you like by entering titles, genres, or keywords</li>
                 <li><strong>AI Analysis:</strong> Our algorithms analyze your input using advanced machine learning techniques</li>
                 <li><strong>Smart Matching:</strong> We match your preferences with our extensive database of content</li>
@@ -346,8 +409,8 @@
             <p>
                 Ready to discover your next favorite content? Getting started with OptiChoice is easy:
             </p>
-            <div style="background: #f0f8ff; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #4169e1;">
-                <ol style="margin: 0; font-size: 1.1rem; line-height: 1.8;">
+            <div style="background: var(--get-started-bg); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--get-started-border); color: var(--text);">
+                <ol style="margin: 0; font-size: 1.1rem; line-height: 1.8; color: var(--text-light);">
                     <li>Choose a content type (Movies, Books, or Courses)</li>
                     <li>Enter something you already like or search by genre</li>
                     <li>Select your preferred AI algorithm</li>
