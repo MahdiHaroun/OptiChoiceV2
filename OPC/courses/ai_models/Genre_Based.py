@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import re
 
 try:
     from django.conf import settings
@@ -90,7 +87,7 @@ def load_course_data():
     if DJANGO_AVAILABLE and settings and hasattr(settings, 'BASE_DIR'):
         try:
             csv_path = os.path.join(settings.BASE_DIR, '..', 'course_db.csv')
-        except:
+        except Exception:
             # Fallback to relative path
             csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'course_db.csv')
     else:
@@ -143,56 +140,115 @@ def create_dummy_course_data():
     
     return pd.DataFrame(dummy_courses)
 
-def recommend_courses_by_genre(selected_genres, number_of_results=5):
+def recommend_courses_by_genre(selected_genres, number_of_results=5, similarity_threshold=0.3):
     """
-    Recommend courses based on selected genres.
+    Recommend courses based on selected genres with similarity threshold filtering.
     
     Args:
         selected_genres (list): List of selected genre strings
         number_of_results (int): Number of recommendations to return
+        similarity_threshold (float): Minimum similarity score (0.0-1.0) to include results
         
     Returns:
-        list: List of recommended course names
+        list: List of recommended course names, empty if similarity too low
     """
     try:
         # Load course data
         courses_df = load_course_data()
         
         if courses_df.empty:
-            return ["No courses available"]
+            return []
         
-        # Filter courses that match any of the selected genres
+        # If too many genres are selected, similarity will be very low
+        if len(selected_genres) > 8:  # Threshold for "too many" genres
+            return []
+        
+        # Calculate similarity scores for each course
         matching_courses = []
         
         for _, course in courses_df.iterrows():
             course_genres = course['genres'] if isinstance(course['genres'], list) else []
             
-            # Check if any selected genre matches the course genres
-            if any(genre in course_genres for genre in selected_genres):
+            if not course_genres:
+                continue
+                
+            # Calculate similarity score using Jaccard similarity
+            # Jaccard = |intersection| / |union|
+            intersection = len(set(selected_genres) & set(course_genres))
+            union = len(set(selected_genres) | set(course_genres))
+            
+            if union == 0:
+                continue
+                
+            jaccard_similarity = intersection / union
+            
+            # Calculate a weighted score that considers:
+            # 1. Jaccard similarity (main factor)
+            # 2. Coverage: how many of the selected genres are covered
+            # 3. Specificity: prefer courses with fewer total genres (more specific)
+            
+            coverage_ratio = intersection / len(selected_genres) if len(selected_genres) > 0 else 0
+            specificity_bonus = 1 / (len(course_genres) + 1)  # Prefer more specific courses
+            
+            # Combined similarity score
+            similarity_score = (
+                jaccard_similarity * 0.6 +      # 60% weight on Jaccard similarity
+                coverage_ratio * 0.3 +          # 30% weight on coverage
+                specificity_bonus * 0.1          # 10% weight on specificity
+            )
+            
+            # Only include courses that meet the similarity threshold
+            if similarity_score >= similarity_threshold:
                 matching_courses.append({
                     'course_id': course['course_id'],
                     'course_name': course['course_name'],
                     'genres': course_genres,
-                    'match_score': len(set(selected_genres) & set(course_genres))
+                    'similarity_score': similarity_score,
+                    'jaccard_similarity': jaccard_similarity,
+                    'coverage_ratio': coverage_ratio,
+                    'match_count': intersection
                 })
         
+        # If no courses meet the similarity threshold, return empty list
         if not matching_courses:
-            return ["No courses found for the selected genres"]
+            return []
         
-        # Sort by match score (how many genres match) and randomize within same scores
-        matching_courses.sort(key=lambda x: x['match_score'], reverse=True)
+        # Sort by similarity score (highest first)
+        matching_courses.sort(key=lambda x: x['similarity_score'], reverse=True)
         
-        # Add some randomization to avoid always returning the same results
-        np.random.shuffle(matching_courses)
+        # Add some controlled randomization within similar score ranges
+        # Group by similarity score ranges and shuffle within groups
+        score_groups = {}
+        for course in matching_courses:
+            score_range = round(course['similarity_score'], 1)  # Group by 0.1 increments
+            if score_range not in score_groups:
+                score_groups[score_range] = []
+            score_groups[score_range].append(course)
+        
+        # Shuffle within each score group and reconstruct the list
+        final_courses = []
+        for score_range in sorted(score_groups.keys(), reverse=True):
+            group_courses = score_groups[score_range]
+            np.random.shuffle(group_courses)
+            final_courses.extend(group_courses)
         
         # Return the top recommendations
-        recommendations = [course['course_name'] for course in matching_courses[:number_of_results]]
+        recommendations = [course['course_name'] for course in final_courses[:number_of_results]]
+        
+        # Debug information (can be removed in production)
+        if recommendations:
+            print(f"Genre recommendation: {len(selected_genres)} genres selected, "
+                  f"{len(matching_courses)} courses above threshold {similarity_threshold}, "
+                  f"returning {len(recommendations)} recommendations")
+            for course in final_courses[:3]:  # Log top 3 for debugging
+                print(f"  - {course['course_name']}: score={course['similarity_score']:.3f}, "
+                      f"jaccard={course['jaccard_similarity']:.3f}, coverage={course['coverage_ratio']:.3f}")
         
         return recommendations
         
     except Exception as e:
         print(f"Error in recommend_courses_by_genre: {str(e)}")
-        return [f"Error generating recommendations: {str(e)}"]
+        return []
 
 # Additional function for backwards compatibility
 def recommend_courses_by_genre_legacy(favorite_courses, number_of_results=5):

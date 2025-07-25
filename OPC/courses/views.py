@@ -275,8 +275,30 @@ class CourseGenreBasedRecommendationView(APIView):
             regenerate = serializer.validated_data.get('regenerate', False)
 
             if model_used == 'Genre-Based':
-                # Use the actual AI model
+                # Use the actual AI model with similarity threshold
                 results = recommend_courses_by_genre(course_genres, num_recommendations)
+                
+                # Check if no results were returned due to low similarity
+                if not results:
+                    # Determine the appropriate message based on the number of genres selected
+                    if len(course_genres) > 8:
+                        message = ("Too many topics selected! Courses with this many specific topics are very rare. "
+                                 "Please select fewer topics (max 5-8) for better results.")
+                    elif len(course_genres) > 5:
+                        message = ("No courses found with high enough similarity to your selected topics. "
+                                 "Try selecting fewer topics or different combinations.")
+                    else:
+                        message = ("No courses found matching your selected topics with sufficient similarity. "
+                                 "Please try different topic combinations.")
+                    
+                    return Response({
+                        "success": False,
+                        "message": message,
+                        "recommendations": [],
+                        "selected_genres": course_genres,
+                        "genre_count": len(course_genres),
+                        "suggestion": "Try selecting 2-4 popular topics like Python, Machine Learning, or Data Science for better results."
+                    }, status=status.HTTP_200_OK)
                     
             elif model_used == 'knn_genre':
                 return Response(
@@ -289,7 +311,8 @@ class CourseGenreBasedRecommendationView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            if save_history and isinstance(results, list):
+            # Success case - results found
+            if save_history and isinstance(results, list) and results:
                 RecommendationHistory.objects.create(
                     user=request.user if request.user.is_authenticated else None,
                     input_title=f"Genre-based: {', '.join(course_genres)}",
@@ -298,10 +321,13 @@ class CourseGenreBasedRecommendationView(APIView):
                 )
 
             return Response({
+                "success": True,
                 "recommendations": results,
                 "saved_history": save_history,
                 "regenerated": regenerate,
-                "selected_genres": course_genres
+                "selected_genres": course_genres,
+                "genre_count": len(course_genres),
+                "message": f"Found {len(results)} courses matching your selected topics!"
             }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

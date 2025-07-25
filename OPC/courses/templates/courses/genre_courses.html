@@ -921,6 +921,466 @@
         transform: none;
     }
 }
+
+/* Topic Grid Styling - Modern Design */
+.topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(145deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+    border-radius: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.1);
+}
+
+.topic-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+    user-select: none;
+}
+
+.topic-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--item-color, #667eea) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.topic-item:hover::before {
+    opacity: 1;
+}
+
+.topic-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.15),
+        0 4px 6px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(145deg, #ffffff 0%, #f0f8ff 100%);
+}
+
+.topic-item.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.topic-item.selected::before {
+    opacity: 1;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.3) 100%);
+}
+
+.topic-item i {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.topic-item:hover i,
+.topic-item.selected i {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.topic-item span {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .topic-grid {
+    background: linear-gradient(145deg, rgba(129, 140, 248, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+[data-theme="dark"] .topic-item {
+    background: linear-gradient(145deg, #2a2a2a 0%, #1a1a2e 100%);
+    border-color: rgba(129, 140, 248, 0.2);
+    color: #fff;
+}
+
+[data-theme="dark"] .topic-item:hover {
+    background: linear-gradient(145deg, #23234a 0%, #1a1a2e 100%);
+    border-color: rgba(129, 140, 248, 0.4);
+}
+
+[data-theme="dark"] .topic-item.selected {
+    background: linear-gradient(135deg, var(--primary-hover-dark) 0%, rgba(168, 85, 247, 0.8) 100%);
+}
+
+/* Selected Topics Container */
+.selected-topics-container {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.selected-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.selected-label i {
+    color: #10b981;
+    font-size: 1.1rem;
+}
+
+.selected-topics {
+    min-height: 80px;
+    padding: 1rem;
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%);
+    border: 2px dashed rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.selected-topics.has-selections {
+    border-style: solid;
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.selected-topic-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: slideInScale 0.3s ease;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selected-topic-tag:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: scale(1.05);
+}
+
+.selected-topic-tag .remove-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.selected-topic-tag .remove-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    font-style: italic;
+    opacity: 0.7;
+    width: 100%;
+}
+
+.empty-state i {
+    font-size: 1.2rem;
+    opacity: 0.5;
+}
+
+[data-theme="dark"] .selected-topics {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.08) 0%, rgba(34, 197, 94, 0.08) 100%);
+}
+
+[data-theme="dark"] .selected-topics.has-selections {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(34, 197, 94, 0.15) 100%);
+}
+
+@keyframes slideInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Enhanced form label */
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1.1rem;
+    position: relative;
+}
+
+.form-label i {
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Selection indicator styling */
+.selection-indicator {
+    margin-left: auto;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: var(--primary);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all 0.3s ease;
+}
+
+.selection-indicator.has-selections {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .selection-indicator {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+    color: var(--primary-hover-dark);
+    border-color: rgba(129, 140, 248, 0.3);
+}
+
+[data-theme="dark"] .selection-indicator.has-selections {
+    background: linear-gradient(135deg, var(--primary-hover-dark) 0%, rgba(168, 85, 247, 0.8) 100%);
+    color: white;
+}
+
+/* Quick Selection Buttons - Enhanced */
+.quick-selection-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.quick-selection-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    color: var(--text);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.quick-selection-buttons .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.quick-selection-buttons .btn:hover::before {
+    left: 100%;
+}
+
+.quick-selection-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.quick-selection-buttons .btn-outline-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.quick-selection-buttons .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.quick-selection-buttons .btn-outline-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+}
+
+.quick-selection-buttons .btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.quick-selection-buttons .btn-outline-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+}
+
+.quick-selection-buttons .btn-outline-info:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+}
+
+[data-theme="dark"] .quick-selection-buttons {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+[data-theme="dark"] .quick-selection-buttons .btn {
+    background: linear-gradient(145deg, #2a2a2a 0%, #1a1a2e 100%);
+    color: #fff;
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Form help text enhancement */
+.form-text {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    font-style: italic;
+    animation: slideInUp 0.5s ease;
+}
+
+.form-text i {
+    color: #667eea;
+    font-size: 1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Hover effects for the entire form group */
+.form-group:hover .genre-select {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 
+        0 4px 12px rgba(102, 126, 234, 0.1),
+        0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading state for dropdown */
+.genre-select.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.genre-select.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #667eea;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Enhanced scroll styling for dropdown options */
+.genre-select::-webkit-scrollbar {
+    width: 8px;
+}
+
+.genre-select::-webkit-scrollbar-track {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 4px;
+}
+
+.genre-select::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+}
+
+.genre-select::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
 </style>
 
 <!-- Loading Overlay -->
@@ -949,151 +1409,104 @@
         </div>
         <div class="card-body">
             <div id="genre-form">
-                <!-- Genre Grid -->
-                <div class="genres-grid">
-                    <!-- Python -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-python" name="genres" value="Python">
-                            <label class="custom-control-label" for="genre-python">
-                                <i class="fab fa-python" style="color: #3776ab;"></i>
-                                Python
-                            </label>
+                <!-- Custom Topic Selection Interface -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tags"></i> 
+                        Select Course Topics
+                        <span class="selection-indicator" id="selectionCount">(0 selected)</span>
+                    </label>
+                    
+                    <!-- Topic Grid -->
+                    <div class="topic-grid" id="topicGrid">
+                        <div class="topic-item" data-value="Python" data-color="#3776ab">
+                            <i class="fab fa-python"></i>
+                            <span>🐍 Python</span>
+                        </div>
+                        <div class="topic-item" data-value="CloudComputing" data-color="#0084ff">
+                            <i class="fas fa-cloud"></i>
+                            <span>☁️ Cloud Computing</span>
+                        </div>
+                        <div class="topic-item" data-value="DataAnalysis" data-color="#28a745">
+                            <i class="fas fa-chart-line"></i>
+                            <span>📊 Data Analysis</span>
+                        </div>
+                        <div class="topic-item" data-value="Containers" data-color="#2496ed">
+                            <i class="fab fa-docker"></i>
+                            <span>🐳 Containers</span>
+                        </div>
+                        <div class="topic-item" data-value="MachineLearning" data-color="#ff6b35">
+                            <i class="fas fa-robot"></i>
+                            <span>🤖 Machine Learning</span>
+                        </div>
+                        <div class="topic-item" data-value="ComputerVision" data-color="#6f42c1">
+                            <i class="fas fa-eye"></i>
+                            <span>👁️ Computer Vision</span>
+                        </div>
+                        <div class="topic-item" data-value="DataScience" data-color="#17a2b8">
+                            <i class="fas fa-database"></i>
+                            <span>🔬 Data Science</span>
+                        </div>
+                        <div class="topic-item" data-value="BigData" data-color="#fd7e14">
+                            <i class="fas fa-server"></i>
+                            <span>💾 Big Data</span>
+                        </div>
+                        <div class="topic-item" data-value="Chatbot" data-color="#20c997">
+                            <i class="fas fa-comments"></i>
+                            <span>💬 Chatbot</span>
+                        </div>
+                        <div class="topic-item" data-value="R" data-color="#276dc3">
+                            <i class="fab fa-r-project"></i>
+                            <span>📈 R Programming</span>
+                        </div>
+                        <div class="topic-item" data-value="BackendDev" data-color="#6c757d">
+                            <i class="fas fa-cogs"></i>
+                            <span>⚙️ Backend Development</span>
+                        </div>
+                        <div class="topic-item" data-value="FrontendDev" data-color="#e83e8c">
+                            <i class="fas fa-code"></i>
+                            <span>🎨 Frontend Development</span>
+                        </div>
+                        <div class="topic-item" data-value="Blockchain" data-color="#f7931a">
+                            <i class="fas fa-link"></i>
+                            <span>⛓️ Blockchain</span>
                         </div>
                     </div>
-
-                    <!-- Cloud Computing -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-cloudcomputing" name="genres" value="CloudComputing">
-                            <label class="custom-control-label" for="genre-cloudcomputing">
-                                <i class="fas fa-cloud" style="color: #0084ff;"></i>
-                                Cloud Computing
-                            </label>
+                    
+                    <!-- Selected Topics Display -->
+                    <div class="selected-topics-container">
+                        <label class="selected-label">
+                            <i class="fas fa-check-circle"></i>
+                            Selected Topics:
+                        </label>
+                        <div class="selected-topics" id="selectedTopics">
+                            <div class="empty-state">
+                                <i class="fas fa-hand-pointer"></i>
+                                Click on topics above to select them
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Data Analysis -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-dataanalysis" name="genres" value="DataAnalysis">
-                            <label class="custom-control-label" for="genre-dataanalysis">
-                                <i class="fas fa-chart-line" style="color: #28a745;"></i>
-                                Data Analysis
-                            </label>
-                        </div>
+                    
+                    <!-- Hidden input for form submission -->
+                    <input type="hidden" id="genre-select" name="genres" value="">
+                    
+                    <div class="form-text">
+                        <i class="fas fa-info-circle"></i>
+                        Click on any topic to select/deselect it. Choose 3-5 topics for best results.
                     </div>
+                </div>
 
-                    <!-- Containers -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-containers" name="genres" value="Containers">
-                            <label class="custom-control-label" for="genre-containers">
-                                <i class="fab fa-docker" style="color: #2496ed;"></i>
-                                Containers
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Machine Learning -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-machinelearning" name="genres" value="MachineLearning">
-                            <label class="custom-control-label" for="genre-machinelearning">
-                                <i class="fas fa-robot" style="color: #ff6b35;"></i>
-                                Machine Learning
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Computer Vision -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-computervision" name="genres" value="ComputerVision">
-                            <label class="custom-control-label" for="genre-computervision">
-                                <i class="fas fa-eye" style="color: #6f42c1;"></i>
-                                Computer Vision
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Data Science -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-datascience" name="genres" value="DataScience">
-                            <label class="custom-control-label" for="genre-datascience">
-                                <i class="fas fa-database" style="color: #17a2b8;"></i>
-                                Data Science
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Big Data -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-bigdata" name="genres" value="BigData">
-                            <label class="custom-control-label" for="genre-bigdata">
-                                <i class="fas fa-server" style="color: #fd7e14;"></i>
-                                Big Data
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Chatbot -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-chatbot" name="genres" value="Chatbot">
-                            <label class="custom-control-label" for="genre-chatbot">
-                                <i class="fas fa-comments" style="color: #20c997;"></i>
-                                Chatbot
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- R -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-r" name="genres" value="R">
-                            <label class="custom-control-label" for="genre-r">
-                                <i class="fab fa-r-project" style="color: #276dc3;"></i>
-                                R Programming
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Backend Development -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-backenddev" name="genres" value="BackendDev">
-                            <label class="custom-control-label" for="genre-backenddev">
-                                <i class="fas fa-cogs" style="color: #6c757d;"></i>
-                                Backend Development
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Frontend Development -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-frontenddev" name="genres" value="FrontendDev">
-                            <label class="custom-control-label" for="genre-frontenddev">
-                                <i class="fas fa-code" style="color: #e83e8c;"></i>
-                                Frontend Development
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Blockchain -->
-                    <div class="genre-item">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="genre-blockchain" name="genres" value="Blockchain">
-                            <label class="custom-control-label" for="genre-blockchain">
-                                <i class="fas fa-link" style="color: #f7931a;"></i>
-                                Blockchain
-                            </label>
-                        </div>
-                    </div>
-
+                <!-- Quick Selection Buttons -->
+                <div class="quick-selection-buttons">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="select-all-genres">
+                        <i class="fas fa-check-double"></i> Select All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-genres">
+                        <i class="fas fa-times"></i> Clear All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-info" id="select-popular">
+                        <i class="fas fa-fire"></i> Popular Topics
+                    </button>
                 </div>
 
                 <!-- Controls -->
@@ -1180,39 +1593,54 @@ $(document).ready(function() {
         }
     });
 
-    // Clear genres button
+    // Clear genres button - updated for custom topic selection
     $('#clear-genres').on('click', function() {
-        $('input[name="genres"]').prop('checked', false);
+        // Clear the custom selection system
+        selectedTopics.clear();
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        updateSelectedTopicsDisplay();
+        updateSelectionCount();
+        
         $('#results-section').hide();
         $('#error-section').hide();
     });
 
-    // Get selected genres function
+    // Get selected genres function - updated for custom topic selection
     function getSelectedGenres() {
-        const selectedGenres = [];
-        $('input[name="genres"]:checked').each(function() {
-            selectedGenres.push($(this).val());
-        });
-        return selectedGenres;
+        // Use the selectedTopics Set from our custom system
+        return Array.from(selectedTopics);
     }
 
     // Show results function
     function showResults(data) {
         $('#loadingOverlay').hide();
         
-        if (data.error) {
-            $('#error-message').text(data.error);
+        // Handle the new response format with success flag
+        if (data.error || (data.success === false)) {
+            const errorMessage = data.message || data.error || 'An error occurred while getting recommendations.';
+            $('#error-message').html(`
+                <div style="text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f39c12; margin-bottom: 1rem;"></i>
+                    <h4 style="color: #e74c3c; margin-bottom: 1rem;">No Suitable Courses Found</h4>
+                    <p style="margin-bottom: 1rem; color: #333;">${errorMessage}</p>
+                    ${data.suggestion ? `<p style="color: #27ae60; font-weight: 500;"><i class="fas fa-lightbulb"></i> ${data.suggestion}</p>` : ''}
+                    ${data.genre_count ? `<p style="color: #7f8c8d; font-size: 0.9rem;">You selected ${data.genre_count} topics. Try selecting 2-4 topics for better results.</p>` : ''}
+                </div>
+            `);
             $('#error-section').show();
             $('#results-section').hide();
             return;
         }
 
         const courses = data.recommendations || [];
-        const selectedGenres = getSelectedGenres();
+        const selectedGenres = data.selected_genres || getSelectedGenres();
+        const message = data.message || `Found ${courses.length} courses`;
         
         $('#recommendation-info').html(`
             <i class="fas fa-info-circle"></i>
-            Found <strong>${courses.length}</strong> great courses for topics: <strong>${selectedGenres.join(', ')}</strong>
+            ${message} for topics: <strong>${selectedGenres.join(', ')}</strong>
         `);
 
         $('#recommendations-grid').empty();
@@ -1222,7 +1650,7 @@ $(document).ready(function() {
                 <div class="no-results">
                     <i class="fas fa-graduation-cap"></i>
                     <h4>No Courses Found</h4>
-                    <p>Try selecting different topics or fewer topic combinations.</p>
+                    <p>The similarity threshold wasn't met. Try selecting different or fewer topics.</p>
                 </div>
             `);
         } else {
@@ -1238,7 +1666,7 @@ $(document).ready(function() {
                             <p class="course-provider">Online Course</p>
                             <div class="input-source">
                                 <i class="fas fa-tags"></i>
-                                Genre-based recommendation
+                                High-similarity match
                             </div>
                         </div>
                     </div>
@@ -1486,6 +1914,162 @@ $(document).ready(function() {
             }
         }
     }
+
+    // Custom Topic Selection System
+    let selectedTopics = new Set();
+    
+    // Function to update selection count indicator
+    function updateSelectionCount() {
+        const indicator = document.getElementById('selectionCount');
+        const selectedCount = selectedTopics.size;
+        
+        indicator.textContent = `(${selectedCount} selected)`;
+        
+        if (selectedCount > 0) {
+            indicator.classList.add('has-selections');
+        } else {
+            indicator.classList.remove('has-selections');
+        }
+        
+        // Update hidden input for form submission
+        const hiddenInput = document.getElementById('genre-select');
+        hiddenInput.value = Array.from(selectedTopics).join(',');
+    }
+    
+    // Function to add/remove topic selection
+    function toggleTopicSelection(topicValue, topicText) {
+        if (selectedTopics.has(topicValue)) {
+            // Remove topic
+            selectedTopics.delete(topicValue);
+            document.querySelector(`[data-value="${topicValue}"]`).classList.remove('selected');
+        } else {
+            // Add topic
+            selectedTopics.add(topicValue);
+            document.querySelector(`[data-value="${topicValue}"]`).classList.add('selected');
+        }
+        
+        updateSelectedTopicsDisplay();
+        updateSelectionCount();
+    }
+    
+    // Function to update the selected topics display box
+    function updateSelectedTopicsDisplay() {
+        const container = document.getElementById('selectedTopics');
+        
+        if (selectedTopics.size === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-hand-pointer"></i>
+                    Click on topics above to select them
+                </div>
+            `;
+            container.classList.remove('has-selections');
+        } else {
+            container.classList.add('has-selections');
+            container.innerHTML = '';
+            
+            selectedTopics.forEach(topicValue => {
+                const topicItem = document.querySelector(`[data-value="${topicValue}"]`);
+                const topicText = topicItem.querySelector('span').textContent;
+                const topicIcon = topicItem.querySelector('i').className;
+                
+                const tag = document.createElement('div');
+                tag.className = 'selected-topic-tag';
+                tag.innerHTML = `
+                    <i class="${topicIcon}"></i>
+                    <span>${topicText}</span>
+                    <div class="remove-btn">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+                
+                // Add click handler for remove button
+                tag.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeTopicFromSelection(topicValue);
+                });
+                
+                container.appendChild(tag);
+            });
+        }
+    }
+    
+    // Function to remove topic from selection
+    function removeTopicFromSelection(topicValue) {
+        selectedTopics.delete(topicValue);
+        document.querySelector(`[data-value="${topicValue}"]`).classList.remove('selected');
+        updateSelectedTopicsDisplay();
+        updateSelectionCount();
+    }
+    
+    // Add click handlers for topic items
+    document.querySelectorAll('.topic-item').forEach(item => {
+        const topicValue = item.getAttribute('data-value');
+        const topicText = item.querySelector('span').textContent;
+        const topicColor = item.getAttribute('data-color');
+        
+        // Set custom color property for the item
+        if (topicColor) {
+            item.style.setProperty('--item-color', topicColor);
+        }
+        
+        item.addEventListener('click', () => {
+            toggleTopicSelection(topicValue, topicText);
+        });
+    });
+
+    // Quick selection button handlers
+    document.getElementById('select-all-genres').addEventListener('click', function() {
+        // Clear all first
+        selectedTopics.clear();
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        
+        // Select all topics
+        document.querySelectorAll('.topic-item').forEach(item => {
+            const topicValue = item.getAttribute('data-value');
+            selectedTopics.add(topicValue);
+            item.classList.add('selected');
+        });
+        
+        updateSelectedTopicsDisplay();
+        updateSelectionCount();
+    });
+
+    document.getElementById('clear-all-genres').addEventListener('click', function() {
+        selectedTopics.clear();
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        updateSelectedTopicsDisplay();
+        updateSelectionCount();
+    });
+
+    document.getElementById('select-popular').addEventListener('click', function() {
+        const popularTopics = ['Python', 'MachineLearning', 'DataScience', 'CloudComputing', 'DataAnalysis'];
+        
+        // Clear all first
+        selectedTopics.clear();
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        
+        // Select popular topics
+        popularTopics.forEach(topicValue => {
+            const topicItem = document.querySelector(`[data-value="${topicValue}"]`);
+            if (topicItem) {
+                selectedTopics.add(topicValue);
+                topicItem.classList.add('selected');
+            }
+        });
+        
+        updateSelectedTopicsDisplay();
+        updateSelectionCount();
+    });
+
+    // Initialize selection count on page load
+    updateSelectionCount();
 });
 </script>
 {% endblock %}
