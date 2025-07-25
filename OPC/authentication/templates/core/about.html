@@ -11,16 +11,395 @@
     75%  { box-shadow: 0 0 48px 16px #063ca0, 0 0 0 8px #c70505; }
     100% { box-shadow: 0 0 48px 16px #eb0707, 0 0 0 8px #df8303; }
 }
+
 .about-logo {
-    width: 260px;
-    margin-bottom: 2rem;
+    width: 200px;
+    margin-bottom: 1rem;
     border-radius: 20px;
     animation: logo-shine 8s linear infinite;
 }
+
+.about-wrapper {
+    display: flex;
+    max-width: 1200px;
+    margin: 2rem auto;
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.table-of-contents {
+    flex: 0 0 250px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.table-of-contents h3 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc-list li {
+    margin-bottom: 0.8rem;
+}
+
+.toc-list a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    display: block;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.toc-list a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateX(5px);
+}
+
+.main-content {
+    flex: 1;
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 100px;
+}
+
+.section h2 {
+    color: #333;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.section h3 {
+    color: #555;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.section p {
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.algorithm-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border-left: 4px solid #667eea;
+    transition: transform 0.3s ease;
+}
+
+.algorithm-card:hover {
+    transform: translateY(-2px);
+}
+
+.algorithm-card h4 {
+    color: #333;
+    margin-bottom: 0.8rem;
+    font-size: 1.3rem;
+}
+
+.algorithm-card p {
+    margin-bottom: 0.5rem;
+}
+
+.hero-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    color: white;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.feature-item {
+    background: #f8f9ff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #e8eeff;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .about-wrapper {
+        flex-direction: column;
+    }
+    
+    .table-of-contents {
+        flex: none;
+        position: static;
+    }
+    
+    .main-content {
+        padding: 1rem;
+    }
+}
 </style>
-<div class="about-container" style="text-align:center; margin-top: 3rem;">
-    <img src="{% static 'logo.png' %}" alt="OptiChoice Logo" class="about-logo">
-    <h1>About OptiChoice</h1>
-    <p style="font-size:1.2rem; color:#555; margin-top:1.5rem;">Welcome to OptiChoice!<br>We help you discover the best movies tailored to your taste.<br><br><em>(You can edit this text later.)</em></p>
+
+<div class="about-wrapper">
+    <!-- Table of Contents -->
+    <div class="table-of-contents">
+        <h3>📋 Contents</h3>
+        <ul class="toc-list">
+            <li><a href="#what-is-optichoice">What is OptiChoice?</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#ai-algorithms">AI Algorithms</a></li>
+            <li><a href="#content-types">Content Types</a></li>
+            <li><a href="#get-started">Get Started</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <img src="{% static 'logo.png' %}" alt="OptiChoice Logo" class="about-logo">
+            <h1>Welcome to OptiChoice</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 0;">Your AI-Powered Content Discovery Platform</p>
+        </div>
+
+        <!-- What is OptiChoice Section -->
+        <section id="what-is-optichoice" class="section">
+            <h2>🎯 What is OptiChoice?</h2>
+            <p>
+                OptiChoice is an intelligent recommendation platform that helps you discover your next favorite movies, books, and courses. 
+                Using advanced AI algorithms, we analyze your preferences and suggest content that perfectly matches your taste.
+            </p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🎬</div>
+                    <h4>Movies</h4>
+                    <p>Discover films across all genres tailored to your preferences</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📚</div>
+                    <h4>Books</h4>
+                    <p>Find your next great read with personalized book recommendations</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎓</div>
+                    <h4>Courses</h4>
+                    <p>Learn new skills with courses matched to your interests</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="section">
+            <h2>⚙️ How It Works</h2>
+            <p>
+                OptiChoice uses multiple AI algorithms to understand your preferences and provide accurate recommendations:
+            </p>
+            <ol style="font-size: 1.1rem; line-height: 1.8; color: #666;">
+                <li><strong>Input Your Preferences:</strong> Tell us what you like by entering titles, genres, or keywords</li>
+                <li><strong>AI Analysis:</strong> Our algorithms analyze your input using advanced machine learning techniques</li>
+                <li><strong>Smart Matching:</strong> We match your preferences with our extensive database of content</li>
+                <li><strong>Personalized Results:</strong> Receive recommendations ranked by how well they match your taste</li>
+                <li><strong>Continuous Learning:</strong> The more you use OptiChoice, the better our recommendations become</li>
+            </ol>
+        </section>
+
+        <!-- AI Algorithms Section -->
+        <section id="ai-algorithms" class="section">
+            <h2>🤖 AI Algorithms Explained</h2>
+            <p>
+                We use several cutting-edge AI algorithms to provide you with the best recommendations. Here's how each one works in simple terms:
+            </p>
+
+            <div class="algorithm-card">
+                <h4>🔍 TF-IDF (Text Frequency)</h4>
+                <p>
+                    <strong>What it does:</strong> Finds content with similar names or keywords to what you searched for.
+                </p>
+                <p>
+                    <strong>How it works:</strong> If you search for "Harry Potter," it will recommend other titles that contain similar words like "wizard," "magic," or "fantasy."
+                </p>
+                <p>
+                    <strong>Best for:</strong> Finding content with similar themes and keywords.
+                </p>
+            </div>
+
+            <div class="algorithm-card">
+                <h4>🎯 KNN (K-Nearest Neighbors)</h4>
+                <p>
+                    <strong>What it does:</strong> Finds content that's "nearby" or similar to what you like, just like TF-IDF but smarter.
+                </p>
+                <p>
+                    <strong>How it works:</strong> It looks at many different features (not just words) to find the closest matches to your preferences.
+                </p>
+                <p>
+                    <strong>Best for:</strong> Discovering content that shares multiple similarities with your favorites.
+                </p>
+            </div>
+
+            <div class="algorithm-card">
+                <h4>🎭 KNN + Genre</h4>
+                <p>
+                    <strong>What it does:</strong> Uses genres as the main way to match recommendations to your taste.
+                </p>
+                <p>
+                    <strong>How it works:</strong> If you love action movies, it will prioritize other action films, then look at other features to rank them.
+                </p>
+                <p>
+                    <strong>Best for:</strong> When you have a strong preference for specific genres.
+                </p>
+            </div>
+
+            <div class="algorithm-card">
+                <h4>🧠 Neural Networks</h4>
+                <p>
+                    <strong>What it does:</strong> Uses deep learning to understand complex patterns in your preferences.
+                </p>
+                <p>
+                    <strong>How it works:</strong> Like a digital brain that learns from lots of data to make very sophisticated recommendations.
+                </p>
+                <p>
+                    <strong>Best for:</strong> Finding hidden gems and surprising recommendations you might love.
+                </p>
+            </div>
+
+            <div class="algorithm-card">
+                <h4>📊 Embeddings</h4>
+                <p>
+                    <strong>What it does:</strong> Converts content into mathematical representations to find deep similarities.
+                </p>
+                <p>
+                    <strong>How it works:</strong> Transforms movies, books, and courses into numbers that capture their essence, making it easier to find truly similar content.
+                </p>
+                <p>
+                    <strong>Best for:</strong> Finding content that feels similar even if it doesn't share obvious keywords or genres.
+                </p>
+            </div>
+        </section>
+
+        <!-- Content Types Section -->
+        <section id="content-types" class="section">
+            <h2>📋 Content Types</h2>
+            <h3>🎬 Movies</h3>
+            <p>
+                Our movie database includes films from all genres, decades, and countries. Whether you're looking for the latest blockbusters, 
+                classic cinema, indie films, or international movies, our AI will help you find your perfect match.
+            </p>
+
+            <h3>📚 Books</h3>
+            <p>
+                From bestselling novels to academic texts, poetry to biographies, our book recommendation system covers all genres 
+                and helps you discover your next great read based on authors, themes, and writing styles you enjoy.
+            </p>
+
+            <h3>🎓 Courses</h3>
+            <p>
+                Whether you want to learn programming, art, business, or any other skill, our course recommendations help you find 
+                educational content that matches your learning style, current skill level, and career goals.
+            </p>
+        </section>
+
+        <!-- Get Started Section -->
+        <section id="get-started" class="section">
+            <h2>🚀 Get Started</h2>
+            <p>
+                Ready to discover your next favorite content? Getting started with OptiChoice is easy:
+            </p>
+            <div style="background: #f0f8ff; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #4169e1;">
+                <ol style="margin: 0; font-size: 1.1rem; line-height: 1.8;">
+                    <li>Choose a content type (Movies, Books, or Courses)</li>
+                    <li>Enter something you already like or search by genre</li>
+                    <li>Select your preferred AI algorithm</li>
+                    <li>Get personalized recommendations instantly</li>
+                    <li>Rate and save your favorites for even better future recommendations</li>
+                </ol>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="/" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: transform 0.3s ease;">
+                    Start Exploring Now 🎯
+                </a>
+            </div>
+        </section>
+    </div>
 </div>
+
+<script>
+// Smooth scrolling for table of contents links
+document.querySelectorAll('.toc-list a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Highlight current section in table of contents
+window.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('.section');
+    const tocLinks = document.querySelectorAll('.toc-list a');
+    
+    let currentSection = '';
+    sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 150 && rect.bottom >= 150) {
+            currentSection = section.id;
+        }
+    });
+    
+    tocLinks.forEach(link => {
+        link.style.background = '';
+        if (link.getAttribute('href') === '#' + currentSection) {
+            link.style.background = 'rgba(255, 255, 255, 0.3)';
+        }
+    });
+});
+</script>
 {% endblock %}
