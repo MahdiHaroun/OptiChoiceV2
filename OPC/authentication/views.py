@@ -129,8 +129,6 @@ Thank you for joining OptiChoice! To complete your registration, please click th
 
 {activation_url}
 
-This link will expire in 7 days for security.
-
 Best regards,
 The OptiChoice Team"""
             
@@ -173,39 +171,8 @@ def activate_registration(request, temp_token):
         registration_data = request.session.get(session_key)
         
         if not registration_data:
-            messages.error(request, 'Invalid or expired activation link.')
+            messages.error(request, 'Invalid activation link.')
             return redirect('register')
-        
-        # Check if link has expired (7 days)
-        timestamp_str = registration_data.get('timestamp')
-        if timestamp_str:
-            try:
-                # Parse the timestamp and ensure it's timezone-aware
-                timestamp = timezone.datetime.fromisoformat(timestamp_str)
-                if timestamp.tzinfo is None:
-                    # If naive datetime, make it timezone-aware
-                    timestamp = timezone.make_aware(timestamp)
-                
-                current_time = timezone.now()
-                time_diff = current_time - timestamp
-                
-                # Debug logging
-                print(f"DEBUG Activation: Current time: {current_time}")
-                print(f"DEBUG Activation: Stored timestamp: {timestamp}")
-                print(f"DEBUG Activation: Time difference: {time_diff}")
-                print(f"DEBUG Activation: Hours elapsed: {time_diff.total_seconds() / 3600}")
-                
-                if time_diff > timezone.timedelta(days=7):
-                    # Clean up expired session data
-                    del request.session[session_key]
-                    messages.error(request, 'Activation link has expired. Please register again.')
-                    return redirect('register')
-            except Exception as e:
-                print(f"DEBUG Activation: Error parsing timestamp: {e}")
-                # If there's an error parsing the timestamp, treat it as expired
-                del request.session[session_key]
-                messages.error(request, 'Invalid activation link. Please register again.')
-                return redirect('register')
         
         # Check if user already exists (final check before creation)
         username = registration_data['username']
