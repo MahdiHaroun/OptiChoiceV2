@@ -2,7 +2,13 @@ venv
 *.pyc
 __pycache__/
 
-OPC/books/joblibs/Embeddings/books_emb.pkl
+# Environment files
+.env
+.env.local
+.env.production
+
+# Test files
+teset.py
 OPC/books/joblibs/Embeddings/books_embeddings.pt
 OPC/books/joblibs/Genre_knn/books_df.joblib
 OPC/books/joblibs/Genre_knn/category_encoder.joblib

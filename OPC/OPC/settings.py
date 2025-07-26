@@ -12,45 +12,23 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 
 from pathlib import Path
-from datetime import timedelta
-import os
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
-def load_env():
-    env_file = BASE_DIR / '.env'
-    if env_file.exists():
-        with open(env_file, 'r') as f:
-            for line in f:
-                if line.strip() and not line.startswith('#'):
-                    key, value = line.strip().split('=', 1)
-                    os.environ.setdefault(key, value)
-
-load_env()
-
-def get_env(key, default=None, cast=str):
-    """Get environment variable with optional type casting"""
-    value = os.environ.get(key, default)
-    if cast == bool:
-        return value.lower() in ('true', 'yes', '1', 'on') if isinstance(value, str) else bool(value)
-    elif cast == int:
-        return int(value) if value else default
-    elif cast == list:
-        return [item.strip() for item in value.split(',')] if value else []
-    return value
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_env('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env('DEBUG', True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', '*', cast=list)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 
 
@@ -113,12 +91,8 @@ WSGI_APPLICATION = 'OPC.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': get_env('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': get_env('DB_NAME', BASE_DIR / 'db.sqlite3'),
-        'USER': get_env('DB_USER', ''),
-        'PASSWORD': get_env('DB_PASSWORD', ''),
-        'HOST': get_env('DB_HOST', ''),
-        'PORT': get_env('DB_PORT', ''),
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': BASE_DIR / config('DB_NAME', default='db.sqlite3'),
     }
 }
 
@@ -206,11 +180,11 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=get_env('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', 60, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=get_env('JWT_REFRESH_TOKEN_LIFETIME_DAYS', 1, cast=int)),
+    'ACCESS_TOKEN_LIFETIME': config('JWT_ACCESS_TOKEN_LIFETIME', cast=int),
+    'REFRESH_TOKEN_LIFETIME': config('JWT_REFRESH_TOKEN_LIFETIME', cast=int),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': get_env('JWT_ALGORITHM', 'HS256'),
+    'ALGORITHM': config('JWT_ALGORITHM'),
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
@@ -224,34 +198,31 @@ SIMPLE_JWT = {
 
 # Email Backend Configuration
 # SMTP2GO Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.smtp2go.com'
-EMAIL_PORT = 2525
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'MahdiHaroun'
-EMAIL_HOST_PASSWORD = 'BMI$46515M'
-DEFAULT_FROM_EMAIL = 'OptiChoice <noreply@optichoice.me>'
-EMAIL_SUBJECT_PREFIX = '[OptiChoice] '
-EMAIL_TIMEOUT = 60  # Increased timeout for deployment servers
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_SUBJECT_PREFIX = config('EMAIL_SUBJECT_PREFIX')
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', cast=int)  # Increased timeout for deployment servers
 
 
 
 
 # Session Settings
-SESSION_COOKIE_AGE = get_env('SESSION_COOKIE_AGE', 1209600, cast=int)
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', cast=int)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = config('SESSION_EXPIRE_AT_BROWSER_CLOSE', cast=bool)
+SESSION_SAVE_EVERY_REQUEST = config('SESSION_SAVE_EVERY_REQUEST', cast=bool)
 
 # Authentication Settings
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = config('LOGIN_URL')
+LOGIN_REDIRECT_URL = config('LOGIN_REDIRECT_URL')
+LOGOUT_REDIRECT_URL = config('LOGOUT_REDIRECT_URL')
 
-# CORS Configuration (for React frontend)
-CORS_ALLOWED_ORIGINS = get_env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000', cast=list)
-CORS_ALLOW_CREDENTIALS = get_env('CORS_ALLOW_CREDENTIALS', True, cast=bool)
-CORS_ALLOW_ALL_ORIGINS = get_env('CORS_ALLOW_ALL_ORIGINS', False, cast=bool)
+
 
 # Additional CORS headers for API requests
 CORS_ALLOW_HEADERS = [
